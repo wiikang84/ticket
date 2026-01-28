@@ -2,7 +2,7 @@
 
 ## 프로젝트 개요
 - **목적**: K-POP/콘서트 티켓팅 통합 조회 시스템
-- **버전**: v2.2
+- **버전**: v2.3
 - **시작일**: 2026-01-28
 - **업데이트**: 12시간 단위 (00시, 12시)
 
@@ -20,9 +20,15 @@
 - **수집 방식**: JSON 파싱 (goodsCode, goodsName, placeName, posterImageUrl)
 - **수집 데이터**: 공연명, 날짜, 장소, 포스터, 상품링크
 
-### 제외된 사이트
-- **멜론티켓/YES24**: JavaScript 동적 로딩으로 크롤링 불가 (KOPIS 예매처 링크로 대체)
-- **티켓링크**: 동일
+### 3. 멜론티켓 (Selenium)
+- **URL**: ticket.melon.com
+- **수집 방식**: Selenium (헤드리스 크롬)
+- **수집 데이터**: 공연명, 날짜, 장소, 포스터, 상품링크
+
+### 4. YES24 티켓 (Selenium)
+- **URL**: ticket.yes24.com
+- **수집 방식**: Selenium (헤드리스 크롬)
+- **수집 데이터**: 공연명, 날짜, 장소, 포스터, 상품링크
 
 ## 콘서트 세부 장르 분류 (v2.2 확장)
 
@@ -42,7 +48,8 @@
 - **백엔드**: Python Flask
 - **프론트엔드**: HTML, CSS, JavaScript (Vanilla)
 - **캘린더**: FullCalendar 6.1 (CDN)
-- **라이브러리**: requests, beautifulsoup4, flask-cors
+- **크롤링**: requests, beautifulsoup4, selenium, webdriver-manager
+- **라이브러리**: flask-cors
 
 ## 주요 기능
 
@@ -86,6 +93,12 @@
 - 락/인디, 페스티벌, 기타 탭 추가
 - 인터파크 ticketOpenDate 필드 크롤링 추가
 - 예매오픈일 없으면 공연 2주 전으로 추정 표시
+
+### 2026-01-28 회의 #7 (Selenium 추가)
+**요청:** 멜론티켓/YES24도 크롤링 해달라
+**해결:** Selenium 헤드리스 브라우저로 동적 페이지 크롤링 구현
+- selenium, webdriver-manager 패키지 추가
+- 멜론티켓/YES24 JavaScript 렌더링 후 파싱
 
 ## 파일 구조
 ```

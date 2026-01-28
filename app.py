@@ -14,6 +14,31 @@ import re
 import json
 import hashlib
 
+# Selenium for dynamic page crawling
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
+import threading
+
+# Selenium 브라우저 생성 함수
+def get_chrome_driver():
+    """헤드리스 크롬 브라우저 생성"""
+    options = Options()
+    options.add_argument('--headless')  # 백그라운드 실행
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--window-size=1920,1080')
+    options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
+    return driver
+
 app = Flask(__name__)
 CORS(app)
 
@@ -354,61 +379,90 @@ def get_interpark_tickets():
 
 @app.route('/api/ticketing/melon')
 def get_melon_tickets():
-    """멜론티켓 오픈예정 조회"""
+    """멜론티켓 콘서트 조회 (Selenium)"""
     try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
-
         tickets = []
-        url = "https://ticket.melon.com/csoon/index.htm"
+        driver = None
 
-        response = requests.get(url, headers=headers, timeout=10)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'html.parser')
+        try:
+            driver = get_chrome_driver()
 
-            # 멜론티켓 목록 아이템
-            items = soup.select('.list_ticket li, .ticket_list li, [class*="item"], .csoon_list li')
+            # 멜론티켓 콘서트 페이지
+            url = "https://ticket.melon.com/concert/index.htm"
+            driver.get(url)
+
+            # 페이지 로딩 대기
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, '.list_ticket, .thumb_list, .concert_list, .product_list'))
+            )
+
+            # 페이지 소스 파싱
+            soup = BeautifulSoup(driver.page_source, 'html.parser')
+
+            # 공연 목록 찾기
+            items = soup.select('.list_ticket li, .thumb_list li, .concert_list li, .product_list li, .list_item')
 
             for item in items[:30]:
                 try:
                     # 제목
-                    title_el = item.select_one('.tit, .title, a, h3')
+                    title_el = item.select_one('.tit, .title, .tit_area a, .show_name, h3, h4, strong')
                     if not title_el:
                         continue
                     title = title_el.get_text(strip=True)
-                    if not title or len(title) < 2:
+                    if not title or len(title) < 3:
                         continue
 
-                    # 티켓오픈일
-                    open_el = item.select_one('.date, .open_date, [class*="date"]')
-                    ticket_open = open_el.get_text(strip=True) if open_el else ''
+                    # 광고 필터링
+                    skip_keywords = ['프로모션', '혜택', '이벤트', '쿠폰', '할인', 'VIP']
+                    if any(kw in title for kw in skip_keywords):
+                        continue
+
+                    # 날짜
+                    date_el = item.select_one('.date, .period, .show_date, [class*="date"]')
+                    date_text = date_el.get_text(strip=True) if date_el else ''
+
+                    # 장소
+                    venue_el = item.select_one('.place, .venue, .show_place, [class*="place"]')
+                    venue = venue_el.get_text(strip=True) if venue_el else ''
 
                     # 링크
                     link_el = item.select_one('a[href]')
-                    link = link_el.get('href', '') if link_el else ''
-                    if link and not link.startswith('http'):
-                        link = 'https://ticket.melon.com' + link
+                    link = ''
+                    if link_el:
+                        href = link_el.get('href', '')
+                        if href:
+                            if href.startswith('http'):
+                                link = href
+                            elif href.startswith('/'):
+                                link = 'https://ticket.melon.com' + href
+                            elif 'prodId=' in href or href.isdigit():
+                                link = f'https://ticket.melon.com/performance/detail.htm?prodId={href}'
 
                     # 이미지
                     img_el = item.select_one('img')
-                    poster = img_el.get('src', '') if img_el else ''
-
-                    # D-day 계산
-                    dday = calculate_dday(ticket_open) if ticket_open else None
+                    poster = ''
+                    if img_el:
+                        poster = img_el.get('src', '') or img_el.get('data-src', '')
+                        if poster and poster.startswith('//'):
+                            poster = 'https:' + poster
 
                     tickets.append({
                         'name': title[:100],
-                        'ticket_open': ticket_open,
-                        'dday': dday,
+                        'date': date_text,
+                        'venue': venue,
                         'poster': poster,
                         'source': '멜론티켓',
                         'source_color': '#00cd3c',
                         'link': link or 'https://ticket.melon.com',
+                        'category': categorize_concert(title),
                         'hash': get_cache_key(title)
                     })
-                except:
+                except Exception as e:
                     continue
+
+        finally:
+            if driver:
+                driver.quit()
 
         # 중복 제거
         seen = set()
@@ -431,55 +485,89 @@ def get_melon_tickets():
 
 @app.route('/api/ticketing/yes24')
 def get_yes24_tickets():
-    """YES24 티켓 콘서트/뮤지컬 조회"""
+    """YES24 티켓 콘서트 조회 (Selenium)"""
     try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
-
         tickets = []
+        driver = None
 
-        # 콘서트, 뮤지컬 카테고리
-        urls = [
-            "http://ticket.yes24.com/New/Genre/GenreMain.aspx?genre=15457",  # 콘서트
-            "http://ticket.yes24.com/New/Genre/GenreMain.aspx?genre=15458"   # 뮤지컬
-        ]
+        try:
+            driver = get_chrome_driver()
 
-        for url in urls:
-            try:
-                response = requests.get(url, headers=headers, timeout=10)
-                if response.status_code == 200:
-                    soup = BeautifulSoup(response.text, 'html.parser')
+            # YES24 콘서트 페이지
+            urls = [
+                ("https://ticket.yes24.com/New/Genre/GenreMain.aspx?genre=15457", "콘서트"),
+            ]
 
-                    items = soup.select('.list-item, .item, [class*="product"], .rank-item, li[class*="item"]')
+            for url, category in urls:
+                try:
+                    driver.get(url)
 
-                    for item in items[:20]:
+                    # 페이지 로딩 대기
+                    WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, '.list, .goods-list, .ranking-list, #divGoodsList'))
+                    )
+
+                    # 추가 로딩 대기
+                    import time
+                    time.sleep(2)
+
+                    soup = BeautifulSoup(driver.page_source, 'html.parser')
+
+                    # 공연 목록 찾기
+                    items = soup.select('.goods-list li, .ranking-list li, #divGoodsList li, .list-item, .item-box')
+
+                    for item in items[:25]:
                         try:
                             # 제목
-                            title_el = item.select_one('.title, .tit, a, .name, h3')
+                            title_el = item.select_one('.goods-name, .tit, .title, a[title], h3, h4, strong')
                             if not title_el:
+                                # 링크의 title 속성 확인
+                                link_el = item.select_one('a[title]')
+                                if link_el:
+                                    title = link_el.get('title', '')
+                                else:
+                                    continue
+                            else:
+                                title = title_el.get_text(strip=True)
+
+                            if not title or len(title) < 3:
                                 continue
-                            title = title_el.get_text(strip=True)
-                            if not title or len(title) < 2:
+
+                            # 광고 필터링
+                            skip_keywords = ['프로모션', '혜택', '이벤트', '광고']
+                            if any(kw in title for kw in skip_keywords):
                                 continue
 
                             # 날짜
-                            date_el = item.select_one('.date, .period, [class*="date"]')
+                            date_el = item.select_one('.goods-date, .date, .period, [class*="date"]')
                             date_text = date_el.get_text(strip=True) if date_el else ''
 
                             # 장소
-                            venue_el = item.select_one('.place, .venue, [class*="place"]')
+                            venue_el = item.select_one('.goods-place, .place, .venue, [class*="place"]')
                             venue = venue_el.get_text(strip=True) if venue_el else ''
 
                             # 링크
                             link_el = item.select_one('a[href]')
-                            link = link_el.get('href', '') if link_el else ''
-                            if link and not link.startswith('http'):
-                                link = 'http://ticket.yes24.com' + link
+                            link = ''
+                            if link_el:
+                                href = link_el.get('href', '')
+                                if href:
+                                    if href.startswith('http'):
+                                        link = href
+                                    elif href.startswith('/'):
+                                        link = 'https://ticket.yes24.com' + href
+                                    else:
+                                        link = 'https://ticket.yes24.com/' + href
 
                             # 이미지
                             img_el = item.select_one('img')
-                            poster = img_el.get('src', '') if img_el else ''
+                            poster = ''
+                            if img_el:
+                                poster = img_el.get('src', '') or img_el.get('data-src', '')
+                                if poster and poster.startswith('//'):
+                                    poster = 'https:' + poster
+                                elif poster and not poster.startswith('http'):
+                                    poster = 'https://ticket.yes24.com' + poster
 
                             tickets.append({
                                 'name': title[:100],
@@ -488,13 +576,18 @@ def get_yes24_tickets():
                                 'poster': poster,
                                 'source': 'YES24',
                                 'source_color': '#ffc800',
-                                'link': link or 'http://ticket.yes24.com',
+                                'link': link or 'https://ticket.yes24.com',
+                                'category': categorize_concert(title),
                                 'hash': get_cache_key(title)
                             })
-                        except:
+                        except Exception as e:
                             continue
-            except:
-                continue
+                except Exception as e:
+                    continue
+
+        finally:
+            if driver:
+                driver.quit()
 
         # 중복 제거
         seen = set()
