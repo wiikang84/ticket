@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>티켓팅 통합 정보 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        .update-info {
+            text-align: center;
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        .search-box {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-box h2 {
+            margin-bottom: 20px;
+            color: #00d4ff;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,212,255,0.4);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 10px 25px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 25px;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-color: #00d4ff;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #2a2a4a, #1a1a3e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .dday-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .dday-urgent {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        .dday-soon {
+            background: #ffaa00;
+            color: #000;
+        }
+
+        .dday-normal {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #fff;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-info {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .card-info span {
+            color: #00d4ff;
+        }
+
+        .card-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            margin-top: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 15px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #888;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .source-section {
+            margin-bottom: 40px;
+        }
+
+        .source-section h3 {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .source-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* 모달 스타일 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: linear-gradient(135deg, #1e1e3f, #2a2a5a);
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .modal-poster {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #2a2a4a, #1a1a3e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+        }
+
+        .modal-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-content {
+            padding: 25px;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .modal-dday {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .modal-info {
+            margin-bottom: 25px;
+        }
+
+        .modal-info-item {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal-info-label {
+            width: 80px;
+            color: #888;
+            flex-shrink: 0;
+        }
+
+        .modal-info-value {
+            color: #fff;
+            flex: 1;
+        }
+
+        .modal-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modal-link-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .modal-link-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .link-interpark {
+            background: #ff6464;
+            color: #fff;
+        }
+
+        .link-melon {
+            background: #00cd3c;
+            color: #fff;
+        }
+
+        .link-yes24 {
+            background: #ffc800;
+            color: #000;
+        }
+
+        .link-kopis {
+            background: #00d4ff;
+            color: #000;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #555;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 50px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .form-group {
+                width: 100%;
+            }
+
+            .modal {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>티켓팅 통합 정보 시스템</h1>
+            <p>KOPIS + 인터파크 + 멜론티켓 + YES24 통합 조회</p>
+            <div class="update-info" id="updateInfo">마지막 업데이트: -</div>
+        </header>
+
+        <div class="search-box">
+            <h2>공연 검색</h2>
+            <div class="search-form">
+                <div class="form-group">
+                    <label>검색어</label>
+                    <input type="text" id="keyword" placeholder="아티스트, 공연명 입력...">
+                </div>
+                <div class="form-group">
+                    <label>시작일</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="form-group">
+                    <label>종료일</label>
+                    <input type="date" id="endDate">
+                </div>
+                <div class="form-group">
+                    <label>장르</label>
+                    <select id="genre">
+                        <option value="">전체</option>
+                        <option value="콘서트">콘서트/대중음악</option>
+                        <option value="뮤지컬">뮤지컬</option>
+                        <option value="연극">연극</option>
+                        <option value="클래식">클래식</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="loadAllData()">검색</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('all', this)">전체</button>
+            <button class="tab-btn" onclick="showTab('kopis', this)">KOPIS 공식</button>
+            <button class="tab-btn" onclick="showTab('interpark', this)">인터파크</button>
+            <button class="tab-btn" onclick="showTab('melon', this)">멜론티켓</button>
+            <button class="tab-btn" onclick="showTab('yes24', this)">YES24</button>
+        </div>
+
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-item">
+                <div class="stat-number" id="totalCount">0</div>
+                <div class="stat-label">전체</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="kopisCount">0</div>
+                <div class="stat-label">KOPIS</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="interparkCount">0</div>
+                <div class="stat-label">인터파크</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="melonCount">0</div>
+                <div class="stat-label">멜론</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="yes24Count">0</div>
+                <div class="stat-label">YES24</div>
+            </div>
+        </div>
+
+        <div id="results">
+            <div class="empty-state">
+                <h3>공연 정보를 불러오세요</h3>
+                <p>검색 버튼을 클릭하면 공연 정보를 조회합니다.</p>
+                <br>
+                <button class="btn btn-primary" onclick="loadAllData()">전체 공연 불러오기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 상세 팝업 모달 -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div class="modal-poster" id="modalPoster">
+                <span>No Image</span>
+            </div>
+            <div class="modal-content">
+                <h2 class="modal-title" id="modalTitle">공연명</h2>
+                <div class="modal-dday dday-normal" id="modalDday">D-day</div>
+                <div class="modal-info">
+                    <div class="modal-info-item">
+                        <span class="modal-info-label">공연일</span>
+                        <span class="modal-info-value" id="modalDate">-</span>
+                    </div>
+                    <div class="modal-info-item">
+                        <span class="modal-info-label">장소</span>
+                        <span class="modal-info-value" id="modalVenue">-</span>
+                    </div>
+                    <div class="modal-info-item">
+                        <span class="modal-info-label">장르</span>
+                        <span class="modal-info-value" id="modalGenre">-</span>
+                    </div>
+                    <div class="modal-info-item">
+                        <span class="modal-info-label">티켓오픈</span>
+                        <span class="modal-info-value" id="modalTicketOpen">-</span>
+                    </div>
+                    <div class="modal-info-item">
+                        <span class="modal-info-label">가격</span>
+                        <span class="modal-info-value" id="modalPrice">-</span>
+                    </div>
+                    <div class="modal-info-item">
+                        <span class="modal-info-label">출연</span>
+                        <span class="modal-info-value" id="modalCast">-</span>
+                    </div>
+                    <div class="modal-info-item">
+                        <span class="modal-info-label">상태</span>
+                        <span class="modal-info-value" id="modalState">-</span>
+                    </div>
+                </div>
+                <div class="modal-links" id="modalLinks">
+                    <!-- 예매 링크 버튼들 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>티켓팅 통합 정보 시스템 v2.0</p>
+        <p style="margin-top: 10px; font-size: 0.85rem;">데이터 출처: KOPIS(공연예술통합전산망), 인터파크, 멜론티켓, YES24</p>
+        <p style="margin-top: 5px; font-size: 0.8rem; color: #555;">업데이트 주기: 하루 2회 (수동 새로고침)</p>
+    </footer>
+
+    <script>
+        // 현재 날짜 설정
+        const today = new Date();
+        const sixtyDaysLater = new Date(today.getTime() + 60 * 24 * 60 * 60 * 1000);
+
+        document.getElementById('startDate').value = today.toISOString().split('T')[0];
+        document.getElementById('endDate').value = sixtyDaysLater.toISOString().split('T')[0];
+
+        let allData = {
+            kopis: [],
+            interpark: [],
+            melon: [],
+            yes24: []
+        };
+
+        let currentTab = 'all';
+
+        // 탭 전환
+        function showTab(tab, btn) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderResults();
+        }
+
+        // 전체 데이터 로드
+        async function loadAllData() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="loading">데이터를 불러오는 중...</div>';
+
+            const startDate = document.getElementById('startDate').value.replace(/-/g, '');
+            const endDate = document.getElementById('endDate').value.replace(/-/g, '');
+            const genre = document.getElementById('genre').value;
+
+            try {
+                const response = await fetch(`/api/all?start_date=${startDate}&end_date=${endDate}&genre=${genre}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    allData = result.data;
+                    updateStats(result.stats);
+                    document.getElementById('updateInfo').textContent = `마지막 업데이트: ${result.data.timestamp}`;
+                    renderResults();
+                } else {
+                    resultsDiv.innerHTML = `<div class="empty-state"><h3>오류 발생</h3><p>${result.error}</p></div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="empty-state"><h3>오류 발생</h3><p>${error.message}</p></div>`;
+            }
+        }
+
+        // 통계 업데이트
+        function updateStats(stats) {
+            document.getElementById('totalCount').textContent = stats.total || 0;
+            document.getElementById('kopisCount').textContent = stats.kopis || 0;
+            document.getElementById('interparkCount').textContent = stats.interpark || 0;
+            document.getElementById('melonCount').textContent = stats.melon || 0;
+            document.getElementById('yes24Count').textContent = stats.yes24 || 0;
+        }
+
+        // D-day 뱃지 생성
+        function getDdayBadge(dday) {
+            if (dday === null || dday === undefined) return '';
+
+            let className = 'dday-normal';
+            let text = '';
+
+            if (dday < 0) {
+                text = '종료';
+                className = 'dday-normal';
+            } else if (dday === 0) {
+                text = 'D-Day';
+                className = 'dday-urgent';
+            } else if (dday <= 7) {
+                text = `D-${dday}`;
+                className = 'dday-urgent';
+            } else if (dday <= 14) {
+                text = `D-${dday}`;
+                className = 'dday-soon';
+            } else {
+                text = `D-${dday}`;
+                className = 'dday-normal';
+            }
+
+            return `<span class="dday-badge ${className}">${text}</span>`;
+        }
+
+        // 결과 렌더링
+        function renderResults() {
+            const resultsDiv = document.getElementById('results');
+            let html = '';
+
+            const sources = {
+                kopis: { name: 'KOPIS 공식 데이터', color: '#00d4ff', icon: 'K' },
+                interpark: { name: '인터파크', color: '#ff6464', icon: 'I' },
+                melon: { name: '멜론티켓', color: '#00cd3c', icon: 'M' },
+                yes24: { name: 'YES24', color: '#ffc800', icon: 'Y' }
+            };
+
+            const tabsToShow = currentTab === 'all' ? ['kopis', 'interpark', 'melon', 'yes24'] : [currentTab];
+
+            tabsToShow.forEach(source => {
+                const data = allData[source];
+                if (data && data.length > 0) {
+                    const info = sources[source];
+                    html += `
+                        <div class="source-section">
+                            <h3>
+                                <span class="source-icon" style="background: ${info.color}30; color: ${info.color}">
+                                    ${info.icon}
+                                </span>
+                                ${info.name} (${data.length}건)
+                            </h3>
+                            <div class="results-grid">
+                    `;
+
+                    data.forEach((item, index) => {
+                        const ddayBadge = getDdayBadge(item.dday);
+                        html += `
+                            <div class="card" onclick='showDetail(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+                                <div class="card-img">
+                                    ${item.poster ? `<img src="${item.poster}" alt="${item.name}" onerror="this.parentElement.innerHTML='No Image'">` : 'No Image'}
+                                    ${ddayBadge}
+                                </div>
+                                <div class="card-body">
+                                    <div class="card-title">${item.name || '제목 없음'}</div>
+                                    ${item.venue ? `<div class="card-info"><span>장소</span> ${item.venue}</div>` : ''}
+                                    ${item.start_date ? `<div class="card-info"><span>기간</span> ${item.start_date} ~ ${item.end_date || ''}</div>` : ''}
+                                    ${item.date ? `<div class="card-info"><span>날짜</span> ${item.date}</div>` : ''}
+                                    ${item.ticket_open ? `<div class="card-info"><span>티켓오픈</span> ${item.ticket_open}</div>` : ''}
+                                    <span class="card-badge" style="background: ${info.color}30; color: ${info.color}">${item.source}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += '</div></div>';
+                }
+            });
+
+            if (!html) {
+                html = '<div class="empty-state"><h3>결과가 없습니다</h3><p>다른 검색어나 날짜로 시도해보세요.</p></div>';
+            }
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // 상세 팝업 표시
+        async function showDetail(item) {
+            const modal = document.getElementById('modalOverlay');
+
+            // 기본 정보 설정
+            document.getElementById('modalTitle').textContent = item.name || '공연명 없음';
+            document.getElementById('modalVenue').textContent = item.venue || '-';
+            document.getElementById('modalGenre').textContent = item.genre || '-';
+            document.getElementById('modalState').textContent = item.state || '-';
+            document.getElementById('modalTicketOpen').textContent = item.ticket_open || '-';
+
+            // 날짜 정보
+            if (item.start_date) {
+                document.getElementById('modalDate').textContent = `${item.start_date} ~ ${item.end_date || ''}`;
+            } else if (item.date) {
+                document.getElementById('modalDate').textContent = item.date;
+            } else {
+                document.getElementById('modalDate').textContent = '-';
+            }
+
+            // 포스터
+            const posterDiv = document.getElementById('modalPoster');
+            if (item.poster) {
+                posterDiv.innerHTML = `<img src="${item.poster}" alt="${item.name}" onerror="this.parentElement.innerHTML='No Image'">`;
+            } else {
+                posterDiv.innerHTML = '<span>No Image</span>';
+            }
+
+            // D-day
+            const ddayDiv = document.getElementById('modalDday');
+            if (item.dday !== null && item.dday !== undefined) {
+                let ddayText = item.dday === 0 ? 'D-Day' : (item.dday > 0 ? `D-${item.dday}` : '종료');
+                let ddayClass = item.dday <= 7 ? 'dday-urgent' : (item.dday <= 14 ? 'dday-soon' : 'dday-normal');
+                ddayDiv.textContent = ddayText;
+                ddayDiv.className = `modal-dday ${ddayClass}`;
+                ddayDiv.style.display = 'inline-block';
+            } else {
+                ddayDiv.style.display = 'none';
+            }
+
+            // KOPIS인 경우 상세 정보 추가 로드
+            if (item.source === 'KOPIS' && item.id) {
+                try {
+                    const response = await fetch(`/api/kopis/performance/${item.id}`);
+                    const result = await response.json();
+                    if (result.success) {
+                        const detail = result.data;
+                        document.getElementById('modalPrice').textContent = detail.price || '-';
+                        document.getElementById('modalCast').textContent = detail.cast || '-';
+                        if (detail.schedule) {
+                            document.getElementById('modalDate').textContent += ` (${detail.schedule})`;
+                        }
+                    }
+                } catch (e) {
+                    console.log('상세 정보 로드 실패:', e);
+                }
+            } else {
+                document.getElementById('modalPrice').textContent = '-';
+                document.getElementById('modalCast').textContent = '-';
+            }
+
+            // 예매 링크 버튼
+            const linksDiv = document.getElementById('modalLinks');
+            let linksHtml = '';
+
+            if (item.link) {
+                const linkClass = item.source === '인터파크' ? 'link-interpark' :
+                                 item.source === '멜론티켓' ? 'link-melon' :
+                                 item.source === 'YES24' ? 'link-yes24' : 'link-kopis';
+                linksHtml += `<a href="${item.link}" target="_blank" class="modal-link-btn ${linkClass}">${item.source} 예매하기</a>`;
+            }
+
+            // 다른 예매처 검색 링크 추가
+            const searchName = encodeURIComponent(item.name);
+            if (item.source !== '인터파크') {
+                linksHtml += `<a href="https://tickets.interpark.com/search?keyword=${searchName}" target="_blank" class="modal-link-btn link-interpark">인터파크 검색</a>`;
+            }
+            if (item.source !== '멜론티켓') {
+                linksHtml += `<a href="https://ticket.melon.com/search/index.htm?q=${searchName}" target="_blank" class="modal-link-btn link-melon">멜론 검색</a>`;
+            }
+            if (item.source !== 'YES24') {
+                linksHtml += `<a href="http://ticket.yes24.com/search/searchmain.aspx?query=${searchName}" target="_blank" class="modal-link-btn link-yes24">YES24 검색</a>`;
+            }
+
+            linksDiv.innerHTML = linksHtml;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 모달 닫기
+        function closeModal(event) {
+            if (event && event.target !== document.getElementById('modalOverlay')) return;
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Enter 키로 검색
+        document.getElementById('keyword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadAllData();
+            }
+        });
+
+        // 페이지 로드 시 자동 조회
+        window.onload = function() {
+            loadAllData();
+        };
+    </script>
+</body>
+</html>
