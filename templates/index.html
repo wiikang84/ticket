@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>티켓팅 통합 정보 시스템</title>
+    <title>콘서트 통합 정보</title>
+    <!-- FullCalendar -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <style>
         * {
             margin: 0;
@@ -154,6 +157,7 @@
             transition: all 0.3s ease;
             border: 1px solid rgba(255,255,255,0.1);
             cursor: pointer;
+            max-height: 380px;
         }
 
         .card:hover {
@@ -191,6 +195,353 @@
             font-weight: bold;
         }
 
+        .category-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            background: rgba(124, 58, 237, 0.9);
+            color: #fff;
+        }
+
+        /* 뷰 전환 탭 */
+        .view-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .view-tab {
+            padding: 12px 30px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 30px;
+            color: #888;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .view-tab:hover, .view-tab.active {
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        /* 목록 뷰 */
+        .list-view {
+            display: block;
+        }
+
+        /* 캘린더 컨테이너 */
+        .calendar-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .calendar-container.active {
+            display: block;
+        }
+
+        .calendar-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-tab {
+            padding: 10px 25px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 25px;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-tab:hover, .calendar-tab.active {
+            background: #ff6464;
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .calendar-tab.concert-tab.active {
+            background: #00cd3c;
+        }
+
+        .calendar-wrapper {
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* FullCalendar 다크 테마 */
+        .fc {
+            --fc-border-color: rgba(255,255,255,0.1);
+            --fc-button-bg-color: rgba(255,255,255,0.1);
+            --fc-button-border-color: rgba(255,255,255,0.2);
+            --fc-button-hover-bg-color: #7c3aed;
+            --fc-button-hover-border-color: #7c3aed;
+            --fc-button-active-bg-color: #00d4ff;
+            --fc-button-active-border-color: #00d4ff;
+            --fc-today-bg-color: rgba(124, 58, 237, 0.2);
+            --fc-event-bg-color: #ff6464;
+            --fc-event-border-color: #ff6464;
+            --fc-page-bg-color: transparent;
+        }
+
+        .fc .fc-toolbar-title {
+            color: #fff;
+            font-size: 1.3rem;
+        }
+
+        .fc .fc-button {
+            color: #fff;
+        }
+
+        .fc .fc-col-header-cell-cushion,
+        .fc .fc-daygrid-day-number {
+            color: #ccc;
+        }
+
+        .fc .fc-day-today {
+            background: rgba(124, 58, 237, 0.2) !important;
+        }
+
+        .fc-event {
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        .fc-event.ticket-open {
+            background: #ff6464 !important;
+            border-color: #ff6464 !important;
+        }
+
+        .fc-event.concert-date {
+            background: #00cd3c !important;
+            border-color: #00cd3c !important;
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            header p {
+                font-size: 0.85rem;
+            }
+
+            .search-box {
+                padding: 15px;
+            }
+
+            .search-box h2 {
+                font-size: 1.1rem;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .form-group {
+                width: 100%;
+                min-width: unset;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 15px;
+            }
+
+            .view-tabs {
+                flex-direction: row;
+                gap: 5px;
+            }
+
+            .view-tab {
+                flex: 1;
+                padding: 10px 15px;
+                font-size: 0.85rem;
+            }
+
+            .tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 10px;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .tab-btn {
+                padding: 8px 15px;
+                font-size: 0.8rem;
+                flex-shrink: 0;
+            }
+
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 10px;
+            }
+
+            .card {
+                max-height: 320px;
+            }
+
+            .card-img {
+                height: 140px;
+            }
+
+            .card-body {
+                padding: 10px;
+            }
+
+            .card-title {
+                font-size: 0.85rem;
+            }
+
+            .card-info {
+                font-size: 0.75rem;
+            }
+
+            .category-badge {
+                font-size: 0.65rem;
+                padding: 3px 8px;
+            }
+
+            .dday-badge {
+                font-size: 0.7rem;
+                padding: 3px 8px;
+            }
+
+            .site-badges {
+                gap: 4px;
+            }
+
+            .site-badge {
+                width: 24px;
+                height: 24px;
+                font-size: 0.7rem;
+            }
+
+            .stats-bar {
+                gap: 8px;
+            }
+
+            .stat-item {
+                padding: 8px 12px;
+                min-width: 60px;
+            }
+
+            .stat-number {
+                font-size: 1.2rem;
+            }
+
+            .stat-label {
+                font-size: 0.7rem;
+            }
+
+            .calendar-tabs {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 5px;
+            }
+
+            .calendar-tab {
+                padding: 8px 15px;
+                font-size: 0.85rem;
+            }
+
+            .calendar-wrapper {
+                padding: 10px;
+            }
+
+            .fc .fc-toolbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .fc .fc-toolbar-title {
+                font-size: 1rem;
+            }
+
+            .fc .fc-button {
+                padding: 5px 10px;
+                font-size: 0.8rem;
+            }
+
+            /* 모달 모바일 */
+            .modal {
+                margin: 5px;
+                max-height: 95vh;
+            }
+
+            .modal-poster {
+                height: 180px;
+            }
+
+            .modal-content {
+                padding: 15px;
+            }
+
+            .modal-title {
+                font-size: 1.1rem;
+            }
+
+            .modal-info-item {
+                padding: 8px 0;
+            }
+
+            .modal-info-label {
+                width: 60px;
+                font-size: 0.85rem;
+            }
+
+            .modal-info-value {
+                font-size: 0.85rem;
+            }
+
+            .modal-link-btn {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+            }
+
+            footer {
+                padding: 20px;
+            }
+
+            footer p {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* 작은 모바일 */
+        @media (max-width: 480px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                max-height: none;
+            }
+
+            .card-img {
+                height: 180px;
+            }
+        }
+
         .dday-urgent {
             background: #ff4444;
             color: #fff;
@@ -208,6 +559,7 @@
 
         .card-body {
             padding: 15px;
+            overflow: hidden;
         }
 
         .card-title {
@@ -219,12 +571,16 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            max-height: 2.8em;
         }
 
         .card-info {
             font-size: 0.85rem;
             color: #888;
             margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .card-info span {
@@ -237,6 +593,25 @@
             border-radius: 15px;
             font-size: 0.75rem;
             margin-top: 10px;
+        }
+
+        .site-badges {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .site-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: default;
         }
 
         .loading {
@@ -499,8 +874,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>티켓팅 통합 정보 시스템</h1>
-            <p>KOPIS + 인터파크 + 멜론티켓 + YES24 통합 조회</p>
+            <h1>콘서트 통합 정보</h1>
+            <p>K-POP · 아이돌 · 발라드 · 트로트 · 내한공연 · 팬미팅</p>
             <div class="update-info" id="updateInfo">마지막 업데이트: -</div>
         </header>
 
@@ -519,27 +894,27 @@
                     <label>종료일</label>
                     <input type="date" id="endDate">
                 </div>
-                <div class="form-group">
-                    <label>장르</label>
-                    <select id="genre">
-                        <option value="">전체</option>
-                        <option value="콘서트">콘서트/대중음악</option>
-                        <option value="뮤지컬">뮤지컬</option>
-                        <option value="연극">연극</option>
-                        <option value="클래식">클래식</option>
-                    </select>
-                </div>
                 <button class="btn btn-primary" onclick="loadAllData()">검색</button>
             </div>
         </div>
 
-        <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('all', this)">전체</button>
-            <button class="tab-btn" onclick="showTab('kopis', this)">KOPIS 공식</button>
-            <button class="tab-btn" onclick="showTab('interpark', this)">인터파크</button>
-            <button class="tab-btn" onclick="showTab('melon', this)">멜론티켓</button>
-            <button class="tab-btn" onclick="showTab('yes24', this)">YES24</button>
+        <!-- 뷰 전환: 목록 / 캘린더 -->
+        <div class="view-tabs">
+            <button class="view-tab active" onclick="switchView('list', this)">📋 목록 보기</button>
+            <button class="view-tab" onclick="switchView('calendar', this)">📅 캘린더 보기</button>
         </div>
+
+        <!-- 목록 뷰 -->
+        <div id="listView" class="list-view">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('all', this)">🔥 전체</button>
+                <button class="tab-btn" onclick="showTab('아이돌', this)">💜 아이돌/K-POP</button>
+                <button class="tab-btn" onclick="showTab('발라드', this)">🎤 발라드</button>
+                <button class="tab-btn" onclick="showTab('트로트', this)">📺 트로트</button>
+                <button class="tab-btn" onclick="showTab('랩/힙합', this)">🎧 랩/힙합</button>
+                <button class="tab-btn" onclick="showTab('내한공연', this)">🌍 내한공연</button>
+                <button class="tab-btn" onclick="showTab('팬미팅', this)">👥 팬미팅</button>
+            </div>
 
         <div class="stats-bar" id="statsBar">
             <div class="stat-item">
@@ -564,12 +939,28 @@
             </div>
         </div>
 
-        <div id="results">
-            <div class="empty-state">
-                <h3>공연 정보를 불러오세요</h3>
-                <p>검색 버튼을 클릭하면 공연 정보를 조회합니다.</p>
-                <br>
-                <button class="btn btn-primary" onclick="loadAllData()">전체 공연 불러오기</button>
+            <div id="results">
+                <div class="empty-state">
+                    <h3>공연 정보를 불러오세요</h3>
+                    <p>검색 버튼을 클릭하면 공연 정보를 조회합니다.</p>
+                    <br>
+                    <button class="btn btn-primary" onclick="loadAllData()">전체 공연 불러오기</button>
+                </div>
+            </div>
+        </div><!-- /listView -->
+
+        <!-- 캘린더 뷰 -->
+        <div id="calendarView" class="calendar-container">
+            <div class="calendar-tabs">
+                <button class="calendar-tab active" onclick="switchCalendar('ticket', this)">🎫 예매오픈 캘린더</button>
+                <button class="calendar-tab concert-tab" onclick="switchCalendar('concert', this)">🎤 공연일정 캘린더</button>
+            </div>
+            <div class="calendar-wrapper">
+                <div id="calendar"></div>
+            </div>
+            <div style="margin-top: 15px; text-align: center; color: #888; font-size: 0.85rem;">
+                <span style="display: inline-block; width: 12px; height: 12px; background: #ff6464; border-radius: 3px; margin-right: 5px;"></span> 예매오픈일
+                <span style="margin-left: 20px; display: inline-block; width: 12px; height: 12px; background: #00cd3c; border-radius: 3px; margin-right: 5px;"></span> 공연일
             </div>
         </div>
     </div>
@@ -622,9 +1013,9 @@
     </div>
 
     <footer>
-        <p>티켓팅 통합 정보 시스템 v2.0</p>
-        <p style="margin-top: 10px; font-size: 0.85rem;">데이터 출처: KOPIS(공연예술통합전산망), 인터파크, 멜론티켓, YES24</p>
-        <p style="margin-top: 5px; font-size: 0.8rem; color: #555;">업데이트 주기: 하루 2회 (수동 새로고침)</p>
+        <p>콘서트 통합 정보 시스템 v2.1</p>
+        <p style="margin-top: 10px; font-size: 0.85rem;">데이터 출처: KOPIS(공연예술통합전산망), 인터파크</p>
+        <p style="margin-top: 5px; font-size: 0.8rem; color: #555;">업데이트 주기: 12시간 (00시, 12시)</p>
     </footer>
 
     <script>
@@ -635,18 +1026,126 @@
         document.getElementById('startDate').value = today.toISOString().split('T')[0];
         document.getElementById('endDate').value = sixtyDaysLater.toISOString().split('T')[0];
 
-        let allData = {
-            kopis: [],
-            interpark: [],
-            melon: [],
-            yes24: []
-        };
+        let allData = [];  // 통합된 공연 리스트
+        let currentFilter = 'all';  // 필터
+        let currentView = 'list';  // 현재 뷰: list, calendar
+        let currentCalendarType = 'ticket';  // 캘린더 타입: ticket, concert
+        let calendar = null;  // FullCalendar 인스턴스
 
-        let currentTab = 'all';
+        // 뷰 전환 (목록 / 캘린더)
+        function switchView(view, btn) {
+            currentView = view;
+            document.querySelectorAll('.view-tab').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
 
-        // 탭 전환
-        function showTab(tab, btn) {
-            currentTab = tab;
+            if (view === 'list') {
+                document.getElementById('listView').style.display = 'block';
+                document.getElementById('calendarView').classList.remove('active');
+            } else {
+                document.getElementById('listView').style.display = 'none';
+                document.getElementById('calendarView').classList.add('active');
+                initCalendar();
+            }
+        }
+
+        // 캘린더 타입 전환 (예매오픈 / 공연일정)
+        function switchCalendar(type, btn) {
+            currentCalendarType = type;
+            document.querySelectorAll('.calendar-tab').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            updateCalendarEvents();
+        }
+
+        // 캘린더 초기화
+        function initCalendar() {
+            if (calendar) {
+                updateCalendarEvents();
+                return;
+            }
+
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'ko',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,listMonth'
+                },
+                buttonText: {
+                    today: '오늘',
+                    month: '월간',
+                    list: '목록'
+                },
+                height: 'auto',
+                eventClick: function(info) {
+                    const item = info.event.extendedProps.item;
+                    if (item) showDetail(item);
+                },
+                eventDidMount: function(info) {
+                    // 툴팁 추가
+                    info.el.title = info.event.title;
+                }
+            });
+            calendar.render();
+            updateCalendarEvents();
+        }
+
+        // 캘린더 이벤트 업데이트
+        function updateCalendarEvents() {
+            if (!calendar) return;
+
+            // 기존 이벤트 삭제
+            calendar.removeAllEvents();
+
+            // 새 이벤트 추가
+            const events = [];
+            allData.forEach(item => {
+                if (currentCalendarType === 'ticket') {
+                    // 예매오픈 캘린더 - ticket_open 날짜 사용
+                    if (item.ticket_open) {
+                        const dateMatch = item.ticket_open.match(/(\d{4})\.(\d{2})\.(\d{2})/);
+                        if (dateMatch) {
+                            events.push({
+                                title: item.name.substring(0, 20) + (item.name.length > 20 ? '...' : ''),
+                                start: `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`,
+                                className: 'ticket-open',
+                                extendedProps: { item: item }
+                            });
+                        }
+                    }
+                } else {
+                    // 공연일정 캘린더 - start_date 또는 date 사용
+                    let dateStr = item.start_date || item.date || '';
+                    const dateMatch = dateStr.match(/(\d{4})\.(\d{2})\.(\d{2})/);
+                    if (dateMatch) {
+                        let endDate = null;
+                        if (item.end_date) {
+                            const endMatch = item.end_date.match(/(\d{4})\.(\d{2})\.(\d{2})/);
+                            if (endMatch) {
+                                // 종료일 +1일 (FullCalendar는 종료일 미포함)
+                                const ed = new Date(`${endMatch[1]}-${endMatch[2]}-${endMatch[3]}`);
+                                ed.setDate(ed.getDate() + 1);
+                                endDate = ed.toISOString().split('T')[0];
+                            }
+                        }
+                        events.push({
+                            title: item.name.substring(0, 20) + (item.name.length > 20 ? '...' : ''),
+                            start: `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`,
+                            end: endDate,
+                            className: 'concert-date',
+                            extendedProps: { item: item }
+                        });
+                    }
+                }
+            });
+
+            calendar.addEventSource(events);
+        }
+
+        // 탭 전환 (세부 장르 필터)
+        function showTab(filter, btn) {
+            currentFilter = filter;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             if (btn) btn.classList.add('active');
             renderResults();
@@ -659,17 +1158,20 @@
 
             const startDate = document.getElementById('startDate').value.replace(/-/g, '');
             const endDate = document.getElementById('endDate').value.replace(/-/g, '');
-            const genre = document.getElementById('genre').value;
 
             try {
-                const response = await fetch(`/api/all?start_date=${startDate}&end_date=${endDate}&genre=${genre}`);
+                const response = await fetch(`/api/all?start_date=${startDate}&end_date=${endDate}`);
                 const result = await response.json();
 
                 if (result.success) {
-                    allData = result.data;
+                    allData = result.data;  // 통합된 리스트
                     updateStats(result.stats);
-                    document.getElementById('updateInfo').textContent = `마지막 업데이트: ${result.data.timestamp}`;
+                    document.getElementById('updateInfo').textContent = `마지막 업데이트: ${result.timestamp}`;
                     renderResults();
+                    // 캘린더가 활성화되어 있으면 업데이트
+                    if (currentView === 'calendar' && calendar) {
+                        updateCalendarEvents();
+                    }
                 } else {
                     resultsDiv.innerHTML = `<div class="empty-state"><h3>오류 발생</h3><p>${result.error}</p></div>`;
                 }
@@ -714,58 +1216,81 @@
             return `<span class="dday-badge ${className}">${text}</span>`;
         }
 
+        // 판매처 뱃지 생성
+        function getSiteBadges(availableSites) {
+            if (!availableSites || availableSites.length === 0) return '';
+
+            return availableSites.map(site => {
+                const icon = site.name === 'KOPIS' ? 'K' :
+                            site.name === '인터파크' ? 'I' :
+                            site.name === '멜론티켓' ? 'M' :
+                            site.name === 'YES24' ? 'Y' : '?';
+                return `<span class="site-badge" style="background: ${site.color}30; color: ${site.color}" title="${site.name}">${icon}</span>`;
+            }).join('');
+        }
+
         // 결과 렌더링
         function renderResults() {
             const resultsDiv = document.getElementById('results');
             let html = '';
 
-            const sources = {
-                kopis: { name: 'KOPIS 공식 데이터', color: '#00d4ff', icon: 'K' },
-                interpark: { name: '인터파크', color: '#ff6464', icon: 'I' },
-                melon: { name: '멜론티켓', color: '#00cd3c', icon: 'M' },
-                yes24: { name: 'YES24', color: '#ffc800', icon: 'Y' }
-            };
+            // 검색어 필터
+            const keyword = document.getElementById('keyword').value.trim().toLowerCase();
 
-            const tabsToShow = currentTab === 'all' ? ['kopis', 'interpark', 'melon', 'yes24'] : [currentTab];
+            // 세부 장르(category) 필터 적용
+            let filteredData = allData;
 
-            tabsToShow.forEach(source => {
-                const data = allData[source];
-                if (data && data.length > 0) {
-                    const info = sources[source];
+            // 검색어 필터링
+            if (keyword) {
+                filteredData = filteredData.filter(item => {
+                    const name = (item.name || '').toLowerCase();
+                    const venue = (item.venue || '').toLowerCase();
+                    return name.includes(keyword) || venue.includes(keyword);
+                });
+            }
+
+            // 장르 필터링
+            if (currentFilter !== 'all') {
+                filteredData = filteredData.filter(item => item.category === currentFilter);
+            }
+
+            if (filteredData.length > 0) {
+                html += `
+                    <div class="source-section">
+                        <h3>
+                            <span class="source-icon" style="background: #7c3aed30; color: #7c3aed">🎫</span>
+                            공연 목록 (${filteredData.length}건) - D-day 순 정렬
+                        </h3>
+                        <div class="results-grid">
+                `;
+
+                filteredData.forEach((item) => {
+                    const ddayBadge = getDdayBadge(item.dday);
+                    const siteBadges = getSiteBadges(item.available_sites);
+                    const categoryBadge = item.category && item.category !== '기타' ?
+                        `<span class="category-badge">${item.category}</span>` : '';
+
                     html += `
-                        <div class="source-section">
-                            <h3>
-                                <span class="source-icon" style="background: ${info.color}30; color: ${info.color}">
-                                    ${info.icon}
-                                </span>
-                                ${info.name} (${data.length}건)
-                            </h3>
-                            <div class="results-grid">
-                    `;
-
-                    data.forEach((item, index) => {
-                        const ddayBadge = getDdayBadge(item.dday);
-                        html += `
-                            <div class="card" onclick='showDetail(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
-                                <div class="card-img">
-                                    ${item.poster ? `<img src="${item.poster}" alt="${item.name}" onerror="this.parentElement.innerHTML='No Image'">` : 'No Image'}
-                                    ${ddayBadge}
-                                </div>
-                                <div class="card-body">
-                                    <div class="card-title">${item.name || '제목 없음'}</div>
-                                    ${item.venue ? `<div class="card-info"><span>장소</span> ${item.venue}</div>` : ''}
-                                    ${item.start_date ? `<div class="card-info"><span>기간</span> ${item.start_date} ~ ${item.end_date || ''}</div>` : ''}
-                                    ${item.date ? `<div class="card-info"><span>날짜</span> ${item.date}</div>` : ''}
-                                    ${item.ticket_open ? `<div class="card-info"><span>티켓오픈</span> ${item.ticket_open}</div>` : ''}
-                                    <span class="card-badge" style="background: ${info.color}30; color: ${info.color}">${item.source}</span>
-                                </div>
+                        <div class="card" onclick='showDetail(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+                            <div class="card-img">
+                                ${item.poster ? `<img src="${item.poster}" alt="${item.name}" onerror="this.parentElement.innerHTML='No Image'">` : 'No Image'}
+                                ${ddayBadge}
+                                ${categoryBadge}
                             </div>
-                        `;
-                    });
+                            <div class="card-body">
+                                <div class="card-title">${item.name || '제목 없음'}</div>
+                                ${item.venue ? `<div class="card-info"><span>장소</span> ${item.venue}</div>` : ''}
+                                ${item.start_date ? `<div class="card-info"><span>기간</span> ${item.start_date} ~ ${item.end_date || ''}</div>` : ''}
+                                ${item.date ? `<div class="card-info"><span>날짜</span> ${item.date}</div>` : ''}
+                                ${item.ticket_open ? `<div class="card-info"><span>티켓오픈</span> ${item.ticket_open}</div>` : ''}
+                                <div class="site-badges">${siteBadges}</div>
+                            </div>
+                        </div>
+                    `;
+                });
 
-                    html += '</div></div>';
-                }
-            });
+                html += '</div></div>';
+            }
 
             if (!html) {
                 html = '<div class="empty-state"><h3>결과가 없습니다</h3><p>다른 검색어나 날짜로 시도해보세요.</p></div>';
@@ -814,8 +1339,12 @@
                 ddayDiv.style.display = 'none';
             }
 
-            // KOPIS인 경우 상세 정보 추가 로드
-            if (item.source === 'KOPIS' && item.id) {
+            // 예매 링크 영역 초기화
+            const linksDiv = document.getElementById('modalLinks');
+            linksDiv.innerHTML = '<p style="color: #888;">예매 정보 로딩 중...</p>';
+
+            // KOPIS인 경우 상세 정보 + 실제 예매 링크 로드
+            if (item.id) {
                 try {
                     const response = await fetch(`/api/kopis/performance/${item.id}`);
                     const result = await response.json();
@@ -826,39 +1355,43 @@
                         if (detail.schedule) {
                             document.getElementById('modalDate').textContent += ` (${detail.schedule})`;
                         }
+
+                        // 실제 예매 링크 표시 (KOPIS API에서 제공)
+                        let linksHtml = '';
+                        if (detail.booking_sites && detail.booking_sites.length > 0) {
+                            detail.booking_sites.forEach(site => {
+                                linksHtml += `<a href="${site.url}" target="_blank" class="modal-link-btn" style="background: ${site.color}; color: #fff;">${site.name} 예매</a>`;
+                            });
+                            linksDiv.innerHTML = linksHtml;
+                        } else {
+                            linksDiv.innerHTML = '<p style="color: #888;">등록된 예매처가 없습니다.</p>';
+                        }
+                    } else {
+                        document.getElementById('modalPrice').textContent = '-';
+                        document.getElementById('modalCast').textContent = '-';
+                        linksDiv.innerHTML = '<p style="color: #888;">예매 정보를 불러올 수 없습니다.</p>';
                     }
                 } catch (e) {
                     console.log('상세 정보 로드 실패:', e);
+                    document.getElementById('modalPrice').textContent = '-';
+                    document.getElementById('modalCast').textContent = '-';
+                    linksDiv.innerHTML = '<p style="color: #888;">예매 정보를 불러올 수 없습니다.</p>';
                 }
             } else {
+                // KOPIS ID가 없는 경우 (크롤링 데이터)
                 document.getElementById('modalPrice').textContent = '-';
                 document.getElementById('modalCast').textContent = '-';
-            }
 
-            // 예매 링크 버튼
-            const linksDiv = document.getElementById('modalLinks');
-            let linksHtml = '';
-
-            if (item.link) {
-                const linkClass = item.source === '인터파크' ? 'link-interpark' :
-                                 item.source === '멜론티켓' ? 'link-melon' :
-                                 item.source === 'YES24' ? 'link-yes24' : 'link-kopis';
-                linksHtml += `<a href="${item.link}" target="_blank" class="modal-link-btn ${linkClass}">${item.source} 예매하기</a>`;
+                let linksHtml = '';
+                if (item.available_sites && item.available_sites.length > 0) {
+                    item.available_sites.forEach(site => {
+                        if (site.link && site.link !== '') {
+                            linksHtml += `<a href="${site.link}" target="_blank" class="modal-link-btn" style="background: ${site.color}; color: #fff;">${site.name} 예매</a>`;
+                        }
+                    });
+                }
+                linksDiv.innerHTML = linksHtml || '<p style="color: #888;">예매 링크 정보가 없습니다.</p>';
             }
-
-            // 다른 예매처 검색 링크 추가
-            const searchName = encodeURIComponent(item.name);
-            if (item.source !== '인터파크') {
-                linksHtml += `<a href="https://tickets.interpark.com/search?keyword=${searchName}" target="_blank" class="modal-link-btn link-interpark">인터파크 검색</a>`;
-            }
-            if (item.source !== '멜론티켓') {
-                linksHtml += `<a href="https://ticket.melon.com/search/index.htm?q=${searchName}" target="_blank" class="modal-link-btn link-melon">멜론 검색</a>`;
-            }
-            if (item.source !== 'YES24') {
-                linksHtml += `<a href="http://ticket.yes24.com/search/searchmain.aspx?query=${searchName}" target="_blank" class="modal-link-btn link-yes24">YES24 검색</a>`;
-            }
-
-            linksDiv.innerHTML = linksHtml;
 
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -878,7 +1411,14 @@
             }
         });
 
-        // Enter 키로 검색
+        // 검색어 입력 시 실시간 필터링
+        document.getElementById('keyword').addEventListener('input', function(e) {
+            if (allData.length > 0) {
+                renderResults();
+            }
+        });
+
+        // Enter 키로 데이터 새로 로드
         document.getElementById('keyword').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 loadAllData();
