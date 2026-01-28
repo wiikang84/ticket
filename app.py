@@ -24,20 +24,57 @@ KOPIS_BASE_URL = "http://www.kopis.or.kr/openApi/restful"
 # 콘서트/대중음악만 조회
 GENRE_CODE_CONCERT = "CCCD"  # 대중음악/콘서트
 
-# 콘서트 세부 장르 분류 키워드
+# 콘서트 세부 장르 분류 키워드 (확장)
 CONCERT_CATEGORIES = {
     "아이돌": ["BTS", "방탄", "에이핑크", "Apink", "제로베이스원", "ZEROBASE", "아이브", "IVE",
               "르세라핌", "SSERAFIM", "뉴진스", "NewJeans", "스트레이키즈", "Stray Kids",
               "엔시티", "NCT", "세븐틴", "SEVENTEEN", "블랙핑크", "BLACKPINK", "에스파", "aespa",
-              "투모로우바이투게더", "TXT", "엔하이픈", "ENHYPEN", "있지", "ITZY", "케플러", "Kep1er"],
+              "투모로우바이투게더", "TXT", "엔하이픈", "ENHYPEN", "있지", "ITZY", "케플러", "Kep1er",
+              "엑소", "EXO", "샤이니", "SHINee", "레드벨벳", "Red Velvet", "트와이스", "TWICE",
+              "마마무", "MAMAMOO", "오마이걸", "OH MY GIRL", "에이티즈", "ATEEZ", "더보이즈", "THE BOYZ",
+              "스키즈", "SKZ", "빅뱅", "BIGBANG", "위너", "WINNER", "아이콘", "iKON", "트레저", "TREASURE",
+              "엔믹스", "NMIXX", "아이들", "(G)I-DLE", "IDLE", "기들", "스테이씨", "STAYC",
+              "RIIZE", "라이즈", "보이넥스트도어", "BOYNEXTDOOR", "ILLIT", "아일릿", "BABYMONSTER",
+              "NCT127", "NCT DREAM", "WayV", "위이브", "FIFTY FIFTY", "KISS OF LIFE",
+              "PLAVE", "플레이브", "xikers", "싸이커스", "ZEROBASEONE", "ZB1",
+              "소녀시대", "Girls Generation", "2NE1", "투애니원", "원더걸스", "Wonder Girls",
+              "인피니트", "INFINITE", "비스트", "BEAST", "하이라이트", "Highlight",
+              "몬스타엑스", "MONSTA X", "크래비티", "CRAVITY", "피원하모니", "P1Harmony"],
     "발라드": ["먼데이키즈", "임재범", "성시경", "이수", "엠씨더맥스", "MC THE MAX", "나얼",
-              "박효신", "김범수", "휘성", "거미", "이적", "10CM", "폴킴"],
-    "랩/힙합": ["다이나믹듀오", "Dynamic Duo", "쇼미", "힙합", "래퍼", "Rapper", "AOMG", "하이어뮤직"],
-    "락/인디": ["밴드", "Band", "록", "Rock", "인디", "Indie", "데이식스", "DAY6"],
-    "내한공연": ["내한", "World Tour", "Asia Tour", "Live in Seoul", "Live in Korea", "in Seoul"],
-    "팬미팅": ["팬미팅", "Fan Meeting", "팬콘", "FAN-CON", "팬콘서트"],
-    "페스티벌": ["페스티벌", "Festival", "뮤직페스타", "Music Festa"],
-    "트로트": ["트롯", "트로트", "미스터트롯", "미스트롯", "송가인", "임영웅", "영탁"]
+              "박효신", "김범수", "휘성", "거미", "이적", "10CM", "폴킴", "백예린", "헤이즈", "Heize",
+              "규현", "KYUHYUN", "케이윌", "K.Will", "이소라", "정승환", "에일리", "Ailee", "벤", "Ben",
+              "소향", "김연우", "임창정", "이승기", "김필", "하동균", "윤도현", "YB", "이선희",
+              "김건모", "이문세", "조용필", "양희은", "이영현", "솔지", "태연", "TAEYEON",
+              "아이유", "IU", "볼빨간사춘기", "BOL4", "선미", "SUNMI", "청하", "CHUNG HA",
+              "멜로망스", "MeloMance", "어반자카파", "Urban Zakapa", "소유", "SOYOU",
+              "다비치", "DAVICHI", "린", "LYn", "알리", "Ali", "백지영", "Baek Ji Young",
+              "양다일", "임한별", "김나영", "이무진", "태일", "TAEIL"],
+    "랩/힙합": ["다이나믹듀오", "Dynamic Duo", "쇼미", "힙합", "래퍼", "Rapper", "AOMG", "하이어뮤직",
+               "박재범", "Jay Park", "지코", "ZICO", "사이먼도미닉", "Simon Dominic", "그레이", "GRAY",
+               "쌈디", "도끼", "DOK2", "빈지노", "Beenzino", "치타", "스윙스", "Swings",
+               "pH-1", "식케이", "Sik-K", "우원재", "Woo", "창모", "CHANGMO", "래원", "Layone",
+               "이영지", "래퍼", "BE'O", "비오", "ASH ISLAND", "키드밀리", "Kid Milli",
+               "릴보이", "Lil Boi", "넉살", "Nucksal", "해쉬스완", "Hash Swan", "딘딘", "DinDin",
+               "빈첸", "VINXEN", "쿠기", "COOGIE", "조광일", "가호", "Gaho"],
+    "락/인디": ["밴드", "Band", "록", "Rock", "인디", "Indie", "데이식스", "DAY6",
+               "잔나비", "JANNABI", "혁오", "Hyukoh", "실리카겔", "SILICA GEL", "넬", "NELL",
+               "버즈", "BUZZ", "FT아일랜드", "FT Island", "씨엔블루", "CNBLUE", "N.Flying", "엔플라잉",
+               "더로즈", "The Rose", "카더가든", "Car the Garden", "새소년", "SE SO NEON",
+               "이날치", "양방언", "국카스텐", "Guckkasten", "트로이카", "소규모아카시아밴드",
+               "YB밴드", "윤도현밴드", "크라잉넛", "Crying Nut", "노브레인", "No Brain",
+               "장기하", "장기하와 얼굴들", "이승환", "김동률", "루시", "LUCY", "엔드어스", "N.Tic",
+               "피플인텔리"],
+    "내한공연": ["내한", "World Tour", "Asia Tour", "Live in Seoul", "Live in Korea", "in Seoul",
+               "Tour", "콘서트", "Concert", "in Korea", "한국", "서울", "Korea Tour"],
+    "팬미팅": ["팬미팅", "Fan Meeting", "팬콘", "FAN-CON", "팬콘서트", "FANCON", "FANMEETING",
+             "생일", "Birthday", "팬파티", "FAN PARTY", "쇼케이스", "Showcase", "팬이벤트"],
+    "페스티벌": ["페스티벌", "Festival", "뮤직페스타", "Music Festa", "뮤직페스티벌", "FEST",
+               "록페스티벌", "재즈페스티벌", "EDM", "울트라", "Ultra", "워터밤", "Waterbomb",
+               "지산", "펜타포트", "Pentaport", "슬로우라이프", "그린플러그드", "인디고", "Incheon"],
+    "트로트": ["트롯", "트로트", "미스터트롯", "미스트롯", "송가인", "임영웅", "영탁",
+              "정동원", "장민호", "김희재", "이찬원", "홍진영", "태진아", "설운도", "나훈아",
+              "주현미", "진성", "류지광", "양지은", "김다현", "박서진", "임태경", "김호중",
+              "진해성", "남진", "나태주", "김수찬", "신유", "최진희", "박상철"]
 }
 
 # 캐시 저장소 (하루 2회 업데이트용)
@@ -220,13 +257,18 @@ def get_interpark_tickets():
                 if response.status_code == 200:
                     html = response.text
 
-                    # JSON 객체 패턴으로 공연 정보 추출
-                    # {"goodsCode":"26000365","goodsName":"...","placeName":"...","posterImageUrl":"...","playStartDate":"..."}
-                    goods_pattern = r'\{"goodsCode":"(\d+)","goodsName":"([^"]+)"[^}]*"placeName":"([^"]*)"[^}]*"posterImageUrl":"([^"]*)"[^}]*"playStartDate":"(\d+)"[^}]*"playEndDate":"(\d+)"'
+                    # JSON 객체 패턴으로 공연 정보 추출 (예매시작일 포함)
+                    # {"goodsCode":"26000365","goodsName":"...","placeName":"...","posterImageUrl":"...","playStartDate":"...","ticketOpenDate":"..."}
+                    goods_pattern = r'\{"goodsCode":"(\d+)","goodsName":"([^"]+)"[^}]*"placeName":"([^"]*)"[^}]*"posterImageUrl":"([^"]*)"[^}]*"playStartDate":"(\d+)"[^}]*"playEndDate":"(\d+)"(?:[^}]*"ticketOpenDate":"(\d*)")?'
                     matches = re.findall(goods_pattern, html)
 
                     for match in matches:
-                        goods_code, goods_name, place_name, poster_url, start_date, end_date = match
+                        # 7개 필드 (ticketOpenDate 포함)
+                        if len(match) >= 7:
+                            goods_code, goods_name, place_name, poster_url, start_date, end_date, ticket_open = match
+                        else:
+                            goods_code, goods_name, place_name, poster_url, start_date, end_date = match[:6]
+                            ticket_open = ''
 
                         # 광고/프로모션 필터링
                         skip_keywords = ['골드클래스', '프로모션', '우수회원', '혜택', '쿠폰', 'VIP', 'NOL']
@@ -248,16 +290,43 @@ def get_interpark_tickets():
                             date_str = f"{start_fmt} - {end_fmt}" if start_date != end_date else start_fmt
                         except:
                             date_str = ''
+                            start_fmt = ''
+
+                        # 예매 오픈일 포맷팅
+                        ticket_open_fmt = ''
+                        ticket_dday = None
+                        if ticket_open and len(ticket_open) >= 8:
+                            try:
+                                ticket_open_fmt = f"{ticket_open[:4]}.{ticket_open[4:6]}.{ticket_open[6:8]}"
+                                ticket_dday = calculate_dday(ticket_open_fmt)
+                            except:
+                                pass
+
+                        # 예매오픈일 없으면 공연 시작 2주 전으로 추정
+                        if not ticket_open_fmt and start_date and len(start_date) >= 8:
+                            try:
+                                perf_start = datetime.strptime(start_date[:8], '%Y%m%d')
+                                estimated_open = perf_start - timedelta(days=14)
+                                # 이미 지난 날짜면 표시 안 함
+                                if estimated_open >= datetime.now():
+                                    ticket_open_fmt = estimated_open.strftime('%Y.%m.%d') + ' (추정)'
+                                    ticket_dday = calculate_dday(estimated_open.strftime('%Y.%m.%d'))
+                            except:
+                                pass
 
                         tickets.append({
                             'name': goods_name,
                             'date': date_str,
+                            'start_date': start_fmt if 'start_fmt' in dir() and start_fmt else '',
+                            'end_date': end_fmt if 'end_fmt' in dir() else '',
                             'venue': place_name,
                             'poster': poster,
                             'source': '인터파크',
                             'source_color': '#ff6464',
                             'link': link,
                             'category': categorize_concert(goods_name),  # 세부 장르
+                            'ticket_open': ticket_open_fmt,
+                            'dday': ticket_dday,
                             'hash': get_cache_key(goods_name)
                         })
 

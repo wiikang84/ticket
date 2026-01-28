@@ -912,8 +912,11 @@
                 <button class="tab-btn" onclick="showTab('발라드', this)">🎤 발라드</button>
                 <button class="tab-btn" onclick="showTab('트로트', this)">📺 트로트</button>
                 <button class="tab-btn" onclick="showTab('랩/힙합', this)">🎧 랩/힙합</button>
+                <button class="tab-btn" onclick="showTab('락/인디', this)">🎸 락/인디</button>
                 <button class="tab-btn" onclick="showTab('내한공연', this)">🌍 내한공연</button>
                 <button class="tab-btn" onclick="showTab('팬미팅', this)">👥 팬미팅</button>
+                <button class="tab-btn" onclick="showTab('페스티벌', this)">🎪 페스티벌</button>
+                <button class="tab-btn" onclick="showTab('기타', this)">📌 기타</button>
             </div>
 
         <div class="stats-bar" id="statsBar">
@@ -1267,7 +1270,7 @@
                 filteredData.forEach((item) => {
                     const ddayBadge = getDdayBadge(item.dday);
                     const siteBadges = getSiteBadges(item.available_sites);
-                    const categoryBadge = item.category && item.category !== '기타' ?
+                    const categoryBadge = item.category ?
                         `<span class="category-badge">${item.category}</span>` : '';
 
                     html += `
