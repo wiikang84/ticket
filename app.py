@@ -23,19 +23,37 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import threading
+import time as time_module
+import subprocess
+import os
+
+# 크롬 드라이버 경로 캐시
+_chrome_driver_path = None
+
+def get_chrome_driver_path():
+    """크롬 드라이버 경로 (캐시)"""
+    global _chrome_driver_path
+    if _chrome_driver_path is None:
+        _chrome_driver_path = ChromeDriverManager().install()
+    return _chrome_driver_path
 
 # Selenium 브라우저 생성 함수
 def get_chrome_driver():
     """헤드리스 크롬 브라우저 생성"""
     options = Options()
-    options.add_argument('--headless')  # 백그라운드 실행
+    options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
+    options.add_argument('--disable-software-rasterizer')
+    options.add_argument('--disable-extensions')
+    options.add_argument('--disable-infobars')
+    options.add_argument('--remote-debugging-port=0')
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+    options.add_argument('--log-level=3')  # 로그 최소화
 
-    service = Service(ChromeDriverManager().install())
+    service = Service(get_chrome_driver_path())
     driver = webdriver.Chrome(service=service, options=options)
     return driver
 
@@ -379,231 +397,66 @@ def get_interpark_tickets():
 
 @app.route('/api/ticketing/melon')
 def get_melon_tickets():
-    """멜론티켓 콘서트 조회 (Selenium)"""
+    """멜론티켓 콘서트 조회 (Selenium - subprocess)"""
     try:
-        tickets = []
-        driver = None
+        # 별도 프로세스로 Selenium 실행
+        script_path = os.path.join(os.path.dirname(__file__), 'selenium_crawler.py')
+        result = subprocess.run(
+            ['python', script_path, 'melon'],
+            capture_output=True,
+            timeout=120,
+            cwd=os.path.dirname(__file__),
+            encoding='utf-8',
+            errors='replace'
+        )
 
-        try:
-            driver = get_chrome_driver()
+        if result.returncode == 0 and result.stdout:
+            data = json.loads(result.stdout)
+            data['source'] = '멜론티켓'
+            return jsonify(data)
+        else:
+            return jsonify({
+                'success': False,
+                'error': result.stderr or 'No output',
+                'source': '멜론티켓',
+                'data': []
+            })
 
-            # 멜론티켓 콘서트 페이지
-            url = "https://ticket.melon.com/concert/index.htm"
-            driver.get(url)
-
-            # 페이지 로딩 대기
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, '.list_ticket, .thumb_list, .concert_list, .product_list'))
-            )
-
-            # 페이지 소스 파싱
-            soup = BeautifulSoup(driver.page_source, 'html.parser')
-
-            # 공연 목록 찾기
-            items = soup.select('.list_ticket li, .thumb_list li, .concert_list li, .product_list li, .list_item')
-
-            for item in items[:30]:
-                try:
-                    # 제목
-                    title_el = item.select_one('.tit, .title, .tit_area a, .show_name, h3, h4, strong')
-                    if not title_el:
-                        continue
-                    title = title_el.get_text(strip=True)
-                    if not title or len(title) < 3:
-                        continue
-
-                    # 광고 필터링
-                    skip_keywords = ['프로모션', '혜택', '이벤트', '쿠폰', '할인', 'VIP']
-                    if any(kw in title for kw in skip_keywords):
-                        continue
-
-                    # 날짜
-                    date_el = item.select_one('.date, .period, .show_date, [class*="date"]')
-                    date_text = date_el.get_text(strip=True) if date_el else ''
-
-                    # 장소
-                    venue_el = item.select_one('.place, .venue, .show_place, [class*="place"]')
-                    venue = venue_el.get_text(strip=True) if venue_el else ''
-
-                    # 링크
-                    link_el = item.select_one('a[href]')
-                    link = ''
-                    if link_el:
-                        href = link_el.get('href', '')
-                        if href:
-                            if href.startswith('http'):
-                                link = href
-                            elif href.startswith('/'):
-                                link = 'https://ticket.melon.com' + href
-                            elif 'prodId=' in href or href.isdigit():
-                                link = f'https://ticket.melon.com/performance/detail.htm?prodId={href}'
-
-                    # 이미지
-                    img_el = item.select_one('img')
-                    poster = ''
-                    if img_el:
-                        poster = img_el.get('src', '') or img_el.get('data-src', '')
-                        if poster and poster.startswith('//'):
-                            poster = 'https:' + poster
-
-                    tickets.append({
-                        'name': title[:100],
-                        'date': date_text,
-                        'venue': venue,
-                        'poster': poster,
-                        'source': '멜론티켓',
-                        'source_color': '#00cd3c',
-                        'link': link or 'https://ticket.melon.com',
-                        'category': categorize_concert(title),
-                        'hash': get_cache_key(title)
-                    })
-                except Exception as e:
-                    continue
-
-        finally:
-            if driver:
-                driver.quit()
-
-        # 중복 제거
-        seen = set()
-        unique_tickets = []
-        for t in tickets:
-            if t['hash'] not in seen:
-                seen.add(t['hash'])
-                unique_tickets.append(t)
-
-        return jsonify({
-            'success': True,
-            'data': unique_tickets,
-            'source': '멜론티켓',
-            'count': len(unique_tickets)
-        })
-
+    except subprocess.TimeoutExpired:
+        return jsonify({'success': False, 'error': 'Timeout (2분 초과)', 'source': '멜론티켓', 'data': []})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e), 'source': '멜론티켓', 'data': []})
 
 
 @app.route('/api/ticketing/yes24')
 def get_yes24_tickets():
-    """YES24 티켓 콘서트 조회 (Selenium)"""
+    """YES24 티켓 콘서트 조회 (Selenium - subprocess)"""
     try:
-        tickets = []
-        driver = None
+        # 별도 프로세스로 Selenium 실행
+        script_path = os.path.join(os.path.dirname(__file__), 'selenium_crawler.py')
+        result = subprocess.run(
+            ['python', script_path, 'yes24'],
+            capture_output=True,
+            timeout=120,
+            cwd=os.path.dirname(__file__),
+            encoding='utf-8',
+            errors='replace'
+        )
 
-        try:
-            driver = get_chrome_driver()
+        if result.returncode == 0 and result.stdout:
+            data = json.loads(result.stdout)
+            data['source'] = 'YES24'
+            return jsonify(data)
+        else:
+            return jsonify({
+                'success': False,
+                'error': result.stderr or 'No output',
+                'source': 'YES24',
+                'data': []
+            })
 
-            # YES24 콘서트 페이지
-            urls = [
-                ("https://ticket.yes24.com/New/Genre/GenreMain.aspx?genre=15457", "콘서트"),
-            ]
-
-            for url, category in urls:
-                try:
-                    driver.get(url)
-
-                    # 페이지 로딩 대기
-                    WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, '.list, .goods-list, .ranking-list, #divGoodsList'))
-                    )
-
-                    # 추가 로딩 대기
-                    import time
-                    time.sleep(2)
-
-                    soup = BeautifulSoup(driver.page_source, 'html.parser')
-
-                    # 공연 목록 찾기
-                    items = soup.select('.goods-list li, .ranking-list li, #divGoodsList li, .list-item, .item-box')
-
-                    for item in items[:25]:
-                        try:
-                            # 제목
-                            title_el = item.select_one('.goods-name, .tit, .title, a[title], h3, h4, strong')
-                            if not title_el:
-                                # 링크의 title 속성 확인
-                                link_el = item.select_one('a[title]')
-                                if link_el:
-                                    title = link_el.get('title', '')
-                                else:
-                                    continue
-                            else:
-                                title = title_el.get_text(strip=True)
-
-                            if not title or len(title) < 3:
-                                continue
-
-                            # 광고 필터링
-                            skip_keywords = ['프로모션', '혜택', '이벤트', '광고']
-                            if any(kw in title for kw in skip_keywords):
-                                continue
-
-                            # 날짜
-                            date_el = item.select_one('.goods-date, .date, .period, [class*="date"]')
-                            date_text = date_el.get_text(strip=True) if date_el else ''
-
-                            # 장소
-                            venue_el = item.select_one('.goods-place, .place, .venue, [class*="place"]')
-                            venue = venue_el.get_text(strip=True) if venue_el else ''
-
-                            # 링크
-                            link_el = item.select_one('a[href]')
-                            link = ''
-                            if link_el:
-                                href = link_el.get('href', '')
-                                if href:
-                                    if href.startswith('http'):
-                                        link = href
-                                    elif href.startswith('/'):
-                                        link = 'https://ticket.yes24.com' + href
-                                    else:
-                                        link = 'https://ticket.yes24.com/' + href
-
-                            # 이미지
-                            img_el = item.select_one('img')
-                            poster = ''
-                            if img_el:
-                                poster = img_el.get('src', '') or img_el.get('data-src', '')
-                                if poster and poster.startswith('//'):
-                                    poster = 'https:' + poster
-                                elif poster and not poster.startswith('http'):
-                                    poster = 'https://ticket.yes24.com' + poster
-
-                            tickets.append({
-                                'name': title[:100],
-                                'date': date_text,
-                                'venue': venue,
-                                'poster': poster,
-                                'source': 'YES24',
-                                'source_color': '#ffc800',
-                                'link': link or 'https://ticket.yes24.com',
-                                'category': categorize_concert(title),
-                                'hash': get_cache_key(title)
-                            })
-                        except Exception as e:
-                            continue
-                except Exception as e:
-                    continue
-
-        finally:
-            if driver:
-                driver.quit()
-
-        # 중복 제거
-        seen = set()
-        unique_tickets = []
-        for t in tickets:
-            if t['hash'] not in seen:
-                seen.add(t['hash'])
-                unique_tickets.append(t)
-
-        return jsonify({
-            'success': True,
-            'data': unique_tickets,
-            'source': 'YES24',
-            'count': len(unique_tickets)
-        })
-
+    except subprocess.TimeoutExpired:
+        return jsonify({'success': False, 'error': 'Timeout (2분 초과)', 'source': 'YES24', 'data': []})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e), 'source': 'YES24', 'data': []})
 
