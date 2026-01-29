@@ -990,12 +990,17 @@ def search_all():
 
 
 if __name__ == '__main__':
+    import socket
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+
     print("=" * 50)
     print("  티켓팅 통합 정보 시스템 v3.0")
     print("  - KOPIS + 인터파크 + 멜론티켓 + YES24")
     print("  - 콘서트 / 연극&뮤지컬 파트 분류")
     print("  - 상세 크롤링 / 예매처 링크")
     print("=" * 50)
-    print("  브라우저에서 http://localhost:5000 접속")
+    print(f"  PC: http://localhost:5000")
+    print(f"  모바일: http://{local_ip}:5000")
     print("=" * 50)
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5000, host='0.0.0.0')
