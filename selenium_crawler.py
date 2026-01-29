@@ -13,6 +13,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+import undetected_chromedriver as uc
 from bs4 import BeautifulSoup
 import time
 import hashlib
@@ -70,6 +71,22 @@ def get_driver():
         '''
     })
 
+    return driver
+
+
+def get_undetected_driver():
+    """undetected-chromedriver로 봇 차단 우회 (비표시 모드)"""
+    options = uc.ChromeOptions()
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--window-size=1920,1080')
+    options.add_argument('--log-level=3')
+    # 창을 화면 밖으로 이동 (headless 대신)
+    options.add_argument('--window-position=-2400,-2400')
+
+    # headless=False로 실행 (봇 탐지 우회)
+    driver = uc.Chrome(options=options, headless=False, version_main=144)
     return driver
 
 def crawl_melon():
@@ -158,62 +175,99 @@ def crawl_melon():
     return {'success': True, 'data': unique, 'count': len(unique)}
 
 def crawl_yes24():
-    """YES24 콘서트 크롤링"""
+    """YES24 콘서트 크롤링 (undetected-chromedriver)"""
     tickets = []
     driver = None
+    import re
 
     try:
-        driver = get_driver()
+        # undetected-chromedriver 사용 (봇 차단 우회)
+        driver = get_undetected_driver()
         driver.get("https://ticket.yes24.com/New/Genre/GenreMain.aspx?genre=15457")
-
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, 'body'))
-        )
-        time.sleep(3)
+        time.sleep(7)  # 페이지 로딩 대기
 
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-        items = soup.select('.goods-list li, .ranking-list li, #divGoodsList li, .list-item, .item-box, article')
+        # YES24 공연 목록 구조 파싱
+        # 랭킹 리스트 또는 상품 리스트 찾기
+        items = soup.select('.rank-best li, .list-item, .goods-item, li[class*="item"], .content-list li')
 
-        for item in items[:25]:
+        # 링크에서 공연 정보 추출
+        perf_links = soup.select('a[href*="PerfCode"], a[href*="Perf/"], a[href*="/New/Perf"]')
+        seen_codes = set()
+
+        for link in perf_links:
             try:
-                title_el = item.select_one('.goods-name, .tit, .title, a[title], h3, h4, strong')
-                if not title_el:
-                    link_el = item.select_one('a[title]')
-                    if link_el:
-                        title = link_el.get('title', '')
-                    else:
-                        continue
-                else:
-                    title = title_el.get_text(strip=True)
+                href = link.get('href', '')
+                if not href:
+                    continue
+
+                # PerfCode 추출
+                code_match = re.search(r'PerfCode=(\d+)', href) or re.search(r'/Perf/(\d+)', href)
+                if not code_match:
+                    continue
+                perf_code = code_match.group(1)
+
+                if perf_code in seen_codes:
+                    continue
+                seen_codes.add(perf_code)
+
+                # 제목 찾기
+                title = link.get('title', '')
+                if not title:
+                    title = link.get_text(strip=True)
+
+                # 부모에서 제목 찾기
+                if not title or len(title) < 3:
+                    parent = link.parent
+                    for _ in range(3):
+                        if parent:
+                            title_el = parent.select_one('.goods-name, .tit, .title, strong, h3, h4, p')
+                            if title_el:
+                                title = title_el.get_text(strip=True)
+                                if title and len(title) >= 3:
+                                    break
+                            parent = parent.parent
 
                 if not title or len(title) < 3:
                     continue
 
-                if any(kw in title for kw in ['프로모션', '혜택', '이벤트']):
+                # 특수문자 정리
+                title = title.replace('\xa0', ' ').replace('\u200b', '')
+                title = ' '.join(title.split())
+
+                # 필터
+                if any(kw in title for kw in ['프로모션', '혜택', '이벤트', '광고']):
                     continue
 
-                date_el = item.select_one('.goods-date, .date, .period')
-                date_text = date_el.get_text(strip=True) if date_el else ''
-
-                venue_el = item.select_one('.goods-place, .place, .venue')
-                venue = venue_el.get_text(strip=True) if venue_el else ''
-
-                link_el = item.select_one('a[href]')
-                link = ''
-                if link_el:
-                    href = link_el.get('href', '')
-                    if href.startswith('http'):
-                        link = href
-                    elif href.startswith('/'):
-                        link = 'https://ticket.yes24.com' + href
-
-                img_el = item.select_one('img')
+                # 이미지 찾기
                 poster = ''
-                if img_el:
-                    poster = img_el.get('src', '') or img_el.get('data-src', '')
-                    if poster and poster.startswith('//'):
-                        poster = 'https:' + poster
+                img = link.select_one('img')
+                if not img:
+                    parent = link.parent
+                    if parent:
+                        img = parent.select_one('img')
+                if img:
+                    poster = img.get('src', '') or img.get('data-src', '')
+                    if poster:
+                        if poster.startswith('//'):
+                            poster = 'https:' + poster
+                        elif not poster.startswith('http'):
+                            poster = 'https://ticket.yes24.com' + poster
+
+                # 날짜/장소 찾기 (부모에서)
+                date_text = ''
+                venue = ''
+                parent = link.parent
+                if parent:
+                    date_el = parent.select_one('.date, .period, [class*="date"]')
+                    if date_el:
+                        date_text = date_el.get_text(strip=True)
+                    venue_el = parent.select_one('.place, .venue, [class*="place"]')
+                    if venue_el:
+                        venue = venue_el.get_text(strip=True)
+
+                full_link = f'https://ticket.yes24.com/Perf/{perf_code}'
 
                 tickets.append({
                     'name': title[:100],
@@ -222,17 +276,21 @@ def crawl_yes24():
                     'poster': poster,
                     'source': 'YES24',
                     'source_color': '#ffc800',
-                    'link': link or 'https://ticket.yes24.com',
+                    'link': full_link,
                     'category': categorize_concert(title),
                     'hash': get_cache_key(title)
                 })
             except:
                 continue
+
     except Exception as e:
         return {'success': False, 'error': str(e), 'data': []}
     finally:
         if driver:
-            driver.quit()
+            try:
+                driver.quit()
+            except:
+                pass
 
     seen = set()
     unique = [t for t in tickets if not (t['hash'] in seen or seen.add(t['hash']))]
