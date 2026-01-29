@@ -32,6 +32,31 @@
             padding: 40px 0;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             margin-bottom: 30px;
+            position: relative;
+        }
+
+        .home-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 5px 20px rgba(0,212,255,0.4);
         }
 
         header h1 {
@@ -121,6 +146,63 @@
             box-shadow: 0 5px 20px rgba(0,212,255,0.4);
         }
 
+        /* 메인 파트 탭 (콘서트 / 연극&뮤지컬) */
+        .part-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .part-tab {
+            padding: 15px 40px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 30px;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .part-tab:hover {
+            border-color: #7c3aed;
+            color: #fff;
+        }
+
+        .part-tab.active {
+            background: linear-gradient(90deg, #7c3aed, #00d4ff);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 5px 20px rgba(124, 58, 237, 0.4);
+        }
+
+        /* 소스 탭 (전체/KOPIS/인터파크 등) */
+        .source-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .source-tab {
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            color: #888;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .source-tab:hover, .source-tab.active {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            border-color: #00d4ff;
+        }
+
         .tabs {
             display: flex;
             gap: 10px;
@@ -183,6 +265,12 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        .card-img.no-poster::after {
+            content: 'No Image';
+            color: #555;
+            font-size: 0.9rem;
         }
 
         .dday-badge {
@@ -337,12 +425,37 @@
                 padding: 10px;
             }
 
+            .home-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+                left: 10px;
+            }
+
             header h1 {
                 font-size: 1.5rem;
             }
 
             header p {
                 font-size: 0.85rem;
+            }
+
+            .part-tabs {
+                gap: 10px;
+            }
+
+            .part-tab {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            .source-tabs {
+                gap: 5px;
+            }
+
+            .source-tab {
+                padding: 6px 12px;
+                font-size: 0.8rem;
             }
 
             .search-box {
@@ -732,19 +845,26 @@
             position: absolute;
             top: 15px;
             right: 15px;
-            width: 35px;
-            height: 35px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.1);
-            border: none;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #fff;
             color: #fff;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
             cursor: pointer;
             z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
         }
 
         .modal-close:hover {
-            background: rgba(255,255,255,0.2);
+            background: #ff4444;
+            border-color: #ff4444;
+            transform: scale(1.1);
         }
 
         .modal-poster {
@@ -874,8 +994,9 @@
 <body>
     <div class="container">
         <header>
-            <h1>콘서트 통합 정보</h1>
-            <p>K-POP · 아이돌 · 발라드 · 트로트 · 내한공연 · 팬미팅</p>
+            <button class="home-btn" onclick="goHome()" title="홈으로">🏠</button>
+            <h1>공연 통합 정보</h1>
+            <p>콘서트 · 뮤지컬 · 연극 · K-POP · 내한공연</p>
             <div class="update-info" id="updateInfo">마지막 업데이트: -</div>
         </header>
 
@@ -906,7 +1027,23 @@
 
         <!-- 목록 뷰 -->
         <div id="listView" class="list-view">
-            <div class="tabs">
+            <!-- 메인 파트 탭 -->
+            <div class="part-tabs">
+                <button class="part-tab active" onclick="switchPart('concert', this)">🎤 콘서트</button>
+                <button class="part-tab" onclick="switchPart('theater', this)">🎭 연극 & 뮤지컬</button>
+            </div>
+
+            <!-- 소스 필터 탭 -->
+            <div class="source-tabs">
+                <button class="source-tab active" onclick="filterSource('all', this)">전체</button>
+                <button class="source-tab" onclick="filterSource('KOPIS', this)" style="border-color: #00d4ff;">KOPIS</button>
+                <button class="source-tab" onclick="filterSource('인터파크', this)" style="border-color: #ff6464;">인터파크</button>
+                <button class="source-tab" onclick="filterSource('멜론티켓', this)" style="border-color: #00cd3c;">멜론</button>
+                <button class="source-tab" onclick="filterSource('YES24', this)" style="border-color: #ffc800;">YES24</button>
+            </div>
+
+            <!-- 콘서트 세부 장르 탭 (콘서트 파트에서만 표시) -->
+            <div class="tabs" id="genreTabs">
                 <button class="tab-btn active" onclick="showTab('all', this)">🔥 전체</button>
                 <button class="tab-btn" onclick="showTab('아이돌', this)">💜 아이돌/K-POP</button>
                 <button class="tab-btn" onclick="showTab('발라드', this)">🎤 발라드</button>
@@ -1016,9 +1153,9 @@
     </div>
 
     <footer>
-        <p>콘서트 통합 정보 시스템 v2.1</p>
-        <p style="margin-top: 10px; font-size: 0.85rem;">데이터 출처: KOPIS(공연예술통합전산망), 인터파크</p>
-        <p style="margin-top: 5px; font-size: 0.8rem; color: #555;">업데이트 주기: 12시간 (00시, 12시)</p>
+        <p>공연 통합 정보 시스템 v3.0</p>
+        <p style="margin-top: 10px; font-size: 0.85rem;">데이터 출처: KOPIS(공연예술통합전산망), 인터파크, 멜론티켓, YES24</p>
+        <p style="margin-top: 5px; font-size: 0.8rem; color: #555;">콘서트 / 연극 & 뮤지컬 파트 분류</p>
     </footer>
 
     <script>
@@ -1030,10 +1167,63 @@
         document.getElementById('endDate').value = sixtyDaysLater.toISOString().split('T')[0];
 
         let allData = [];  // 통합된 공연 리스트
-        let currentFilter = 'all';  // 필터
+        let allDataMap = {};  // hash -> item 매핑
+        let currentFilter = 'all';  // 장르 필터
+        let currentPart = 'concert';  // 파트 필터: concert / theater
+        let currentSource = 'all';  // 소스 필터: all / KOPIS / 인터파크 / 멜론티켓 / YES24
         let currentView = 'list';  // 현재 뷰: list, calendar
         let currentCalendarType = 'ticket';  // 캘린더 타입: ticket, concert
         let calendar = null;  // FullCalendar 인스턴스
+
+        // 홈으로 이동 (초기화)
+        function goHome() {
+            currentPart = 'concert';
+            currentSource = 'all';
+            currentFilter = 'all';
+            document.querySelectorAll('.part-tab').forEach(b => b.classList.remove('active'));
+            document.querySelector('.part-tab').classList.add('active');
+            document.querySelectorAll('.source-tab').forEach(b => b.classList.remove('active'));
+            document.querySelector('.source-tab').classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.tab-btn').classList.add('active');
+            document.getElementById('keyword').value = '';
+            document.getElementById('genreTabs').style.display = 'flex';
+            loadAllData();
+        }
+
+        // 파트 전환 (콘서트 / 연극&뮤지컬)
+        function switchPart(part, btn) {
+            currentPart = part;
+            currentFilter = 'all';  // 장르 필터 초기화
+            document.querySelectorAll('.part-tab').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            // 장르 탭은 콘서트 파트에서만 표시
+            const genreTabs = document.getElementById('genreTabs');
+            if (part === 'concert') {
+                genreTabs.style.display = 'flex';
+            } else {
+                genreTabs.style.display = 'none';
+            }
+
+            // 장르 탭 초기화
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.tab-btn').classList.add('active');
+
+            renderResults();
+            // 캘린더 업데이트
+            if (currentView === 'calendar' && calendar) {
+                updateCalendarEvents();
+            }
+        }
+
+        // 소스 필터
+        function filterSource(source, btn) {
+            currentSource = source;
+            document.querySelectorAll('.source-tab').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderResults();
+        }
 
         // 뷰 전환 (목록 / 캘린더)
         function switchView(view, btn) {
@@ -1101,9 +1291,15 @@
             // 기존 이벤트 삭제
             calendar.removeAllEvents();
 
+            // 파트 필터 적용
+            let filteredData = allData.filter(item => {
+                const itemPart = item.part || 'concert';
+                return itemPart === currentPart;
+            });
+
             // 새 이벤트 추가
             const events = [];
-            allData.forEach(item => {
+            filteredData.forEach(item => {
                 if (currentCalendarType === 'ticket') {
                     // 예매오픈 캘린더 - ticket_open 날짜 사용
                     if (item.ticket_open) {
@@ -1168,6 +1364,11 @@
 
                 if (result.success) {
                     allData = result.data;  // 통합된 리스트
+                    // hash -> item 매핑 생성
+                    allDataMap = {};
+                    allData.forEach(item => {
+                        if (item.hash) allDataMap[item.hash] = item;
+                    });
                     updateStats(result.stats);
                     document.getElementById('updateInfo').textContent = `마지막 업데이트: ${result.timestamp}`;
                     renderResults();
@@ -1240,10 +1441,26 @@
             // 검색어 필터
             const keyword = document.getElementById('keyword').value.trim().toLowerCase();
 
-            // 세부 장르(category) 필터 적용
+            // 필터 적용
             let filteredData = allData;
 
-            // 검색어 필터링
+            // 1. 파트 필터링 (concert / theater)
+            filteredData = filteredData.filter(item => {
+                const itemPart = item.part || 'concert';
+                return itemPart === currentPart;
+            });
+
+            // 2. 소스 필터링
+            if (currentSource !== 'all') {
+                filteredData = filteredData.filter(item => {
+                    if (item.available_sites) {
+                        return item.available_sites.some(site => site.name === currentSource);
+                    }
+                    return item.source === currentSource;
+                });
+            }
+
+            // 3. 검색어 필터링
             if (keyword) {
                 filteredData = filteredData.filter(item => {
                     const name = (item.name || '').toLowerCase();
@@ -1252,8 +1469,8 @@
                 });
             }
 
-            // 장르 필터링
-            if (currentFilter !== 'all') {
+            // 4. 장르 필터링 (콘서트 파트에서만)
+            if (currentPart === 'concert' && currentFilter !== 'all') {
                 filteredData = filteredData.filter(item => item.category === currentFilter);
             }
 
@@ -1273,10 +1490,16 @@
                     const categoryBadge = item.category ?
                         `<span class="category-badge">${item.category}</span>` : '';
 
+                    // YES24/멜론 이미지는 캐싱 프록시 사용
+                    let posterUrl = item.poster || '';
+                    if (posterUrl && (posterUrl.includes('yes24.com') || posterUrl.includes('melon.com') || posterUrl.includes('tkfile'))) {
+                        posterUrl = '/api/proxy/image?url=' + encodeURIComponent(posterUrl);
+                    }
+
                     html += `
-                        <div class="card" onclick='showDetail(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+                        <div class="card" data-hash="${item.hash}" onclick="showDetailByHash('${item.hash}')">
                             <div class="card-img">
-                                ${item.poster ? `<img src="${item.poster}" alt="${item.name}" onerror="this.parentElement.innerHTML='No Image'">` : 'No Image'}
+                                ${posterUrl ? `<img src="${posterUrl}" alt="${item.name}" loading="lazy" onerror="this.onerror=null; this.style.display='none'; this.parentElement.classList.add('no-poster');">` : ''}
                                 ${ddayBadge}
                                 ${categoryBadge}
                             </div>
@@ -1302,6 +1525,16 @@
             resultsDiv.innerHTML = html;
         }
 
+        // hash로 상세 팝업 표시
+        function showDetailByHash(hash) {
+            const item = allDataMap[hash];
+            if (item) {
+                showDetail(item);
+            } else {
+                console.error('아이템을 찾을 수 없습니다:', hash);
+            }
+        }
+
         // 상세 팝업 표시
         async function showDetail(item) {
             const modal = document.getElementById('modalOverlay');
@@ -1322,10 +1555,14 @@
                 document.getElementById('modalDate').textContent = '-';
             }
 
-            // 포스터
+            // 포스터 (YES24/멜론은 캐싱 프록시 사용)
             const posterDiv = document.getElementById('modalPoster');
             if (item.poster) {
-                posterDiv.innerHTML = `<img src="${item.poster}" alt="${item.name}" onerror="this.parentElement.innerHTML='No Image'">`;
+                let modalPosterUrl = item.poster;
+                if (modalPosterUrl.includes('yes24.com') || modalPosterUrl.includes('melon.com') || modalPosterUrl.includes('tkfile')) {
+                    modalPosterUrl = '/api/proxy/image?url=' + encodeURIComponent(modalPosterUrl);
+                }
+                posterDiv.innerHTML = `<img src="${modalPosterUrl}" alt="${item.name}" onerror="this.parentElement.innerHTML='<span>No Image</span>'">`;
             } else {
                 posterDiv.innerHTML = '<span>No Image</span>';
             }
@@ -1381,10 +1618,11 @@
                     linksDiv.innerHTML = '<p style="color: #888;">예매 정보를 불러올 수 없습니다.</p>';
                 }
             } else {
-                // KOPIS ID가 없는 경우 (크롤링 데이터)
+                // KOPIS ID가 없는 경우 (크롤링 데이터) - 기본 정보만 표시
                 document.getElementById('modalPrice').textContent = '-';
                 document.getElementById('modalCast').textContent = '-';
 
+                // 예매 링크 표시
                 let linksHtml = '';
                 if (item.available_sites && item.available_sites.length > 0) {
                     item.available_sites.forEach(site => {

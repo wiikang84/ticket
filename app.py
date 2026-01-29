@@ -64,8 +64,42 @@ CORS(app)
 KOPIS_API_KEY = "2012e419e6c24bfa988ca56e2917d3c0"
 KOPIS_BASE_URL = "http://www.kopis.or.kr/openApi/restful"
 
-# 콘서트/대중음악만 조회
+# KOPIS 장르 코드
 GENRE_CODE_CONCERT = "CCCD"  # 대중음악/콘서트
+GENRE_CODE_MUSICAL = "GGGA"  # 뮤지컬
+GENRE_CODE_THEATER = "AAAA"  # 연극
+
+# 장르 코드 매핑
+GENRE_CODES = {
+    'concert': GENRE_CODE_CONCERT,
+    'musical': GENRE_CODE_MUSICAL,
+    'theater': GENRE_CODE_THEATER
+}
+
+# 파트 분류: concert(콘서트) / theater(연극&뮤지컬)
+def classify_part(name, genre=''):
+    """공연명/장르로 파트 분류 (concert / theater)"""
+    if not name:
+        return 'concert'
+
+    name_upper = name.upper()
+    genre_upper = (genre or '').upper()
+
+    # 연극&뮤지컬 키워드
+    theater_keywords = ['뮤지컬', 'MUSICAL', '연극', 'PLAY', 'THEATER', '오페라', 'OPERA',
+                       '발레', 'BALLET', '창극', '마당극', '희곡', '무용']
+
+    # 장르명에서 먼저 체크
+    for kw in theater_keywords:
+        if kw in genre_upper:
+            return 'theater'
+
+    # 공연명에서 체크
+    for kw in theater_keywords:
+        if kw in name_upper:
+            return 'theater'
+
+    return 'concert'
 
 # 콘서트 세부 장르 분류 키워드 (확장)
 CONCERT_CATEGORIES = {
@@ -368,6 +402,7 @@ def get_interpark_tickets():
                             'source_color': '#ff6464',
                             'link': link,
                             'category': categorize_concert(goods_name),  # 세부 장르
+                            'part': classify_part(goods_name),  # 파트: concert / theater
                             'ticket_open': ticket_open_fmt,
                             'dday': ticket_dday,
                             'hash': get_cache_key(goods_name)
@@ -521,59 +556,66 @@ def get_all_data():
         start_date = request.args.get('start_date', datetime.now().strftime('%Y%m%d'))
         end_date = request.args.get('end_date', (datetime.now() + timedelta(days=60)).strftime('%Y%m%d'))
         genre = request.args.get('genre', '')
+        part_filter = request.args.get('part', '')  # 파트 필터: concert / theater / (빈값=전체)
 
         # 통합 공연 목록 (hash -> 공연 정보)
         merged_performances = {}
         source_counts = {'kopis': 0, 'interpark': 0, 'melon': 0, 'yes24': 0}
 
-        # KOPIS 데이터
-        try:
-            params = {
-                'service': KOPIS_API_KEY,
-                'stdate': start_date,
-                'eddate': end_date,
-                'cpage': '1',
-                'rows': '50'
-            }
-            if genre and genre in GENRE_CODES:
-                params['shcate'] = GENRE_CODES[genre]
+        # KOPIS 데이터 - 콘서트, 뮤지컬, 연극 모두 조회
+        kopis_genres = [
+            (GENRE_CODE_CONCERT, 'concert'),   # 대중음악/콘서트
+            (GENRE_CODE_MUSICAL, 'theater'),   # 뮤지컬
+            (GENRE_CODE_THEATER, 'theater')    # 연극
+        ]
 
-            # 콘서트/대중음악만 조회
-            params['shcate'] = GENRE_CODE_CONCERT
+        for genre_code, part_type in kopis_genres:
+            try:
+                params = {
+                    'service': KOPIS_API_KEY,
+                    'stdate': start_date,
+                    'eddate': end_date,
+                    'cpage': '1',
+                    'rows': '50',
+                    'shcate': genre_code
+                }
 
-            response = requests.get(f"{KOPIS_BASE_URL}/pblprfr", params=params, timeout=10)
-            if response.status_code == 200:
-                root = ET.fromstring(response.content)
-                for db in root.findall('.//db'):
-                    name = db.find('prfnm').text if db.find('prfnm') is not None else ''
-                    genre_name = db.find('genrenm').text if db.find('genrenm') is not None else ''
+                response = requests.get(f"{KOPIS_BASE_URL}/pblprfr", params=params, timeout=10)
+                if response.status_code == 200:
+                    root = ET.fromstring(response.content)
+                    for db in root.findall('.//db'):
+                        name = db.find('prfnm').text if db.find('prfnm') is not None else ''
+                        genre_name = db.find('genrenm').text if db.find('genrenm') is not None else ''
 
-                    perf_hash = get_cache_key(normalize_name(name))
+                        perf_hash = get_cache_key(normalize_name(name))
 
-                    # 콘서트 세부 장르 분류
-                    sub_category = categorize_concert(name)
+                        # 콘서트 세부 장르 분류
+                        sub_category = categorize_concert(name)
+                        # 파트 분류
+                        perf_part = classify_part(name, genre_name) if part_type == 'concert' else part_type
 
-                    perf = {
-                        'id': db.find('mt20id').text if db.find('mt20id') is not None else '',
-                        'name': name,
-                        'start_date': db.find('prfpdfrom').text if db.find('prfpdfrom') is not None else '',
-                        'end_date': db.find('prfpdto').text if db.find('prfpdto') is not None else '',
-                        'venue': db.find('fcltynm').text if db.find('fcltynm') is not None else '',
-                        'poster': db.find('poster').text if db.find('poster') is not None else '',
-                        'genre': genre_name,
-                        'category': sub_category,  # 세부 장르
-                        'state': db.find('prfstate').text if db.find('prfstate') is not None else '',
-                        'hash': perf_hash,
-                        'available_sites': [{
-                            'name': 'KOPIS',
-                            'link': '',
-                            'color': '#00d4ff'
-                        }]
-                    }
-                    merged_performances[perf_hash] = perf
-                    source_counts['kopis'] += 1
-        except Exception as e:
-            pass
+                        perf = {
+                            'id': db.find('mt20id').text if db.find('mt20id') is not None else '',
+                            'name': name,
+                            'start_date': db.find('prfpdfrom').text if db.find('prfpdfrom') is not None else '',
+                            'end_date': db.find('prfpdto').text if db.find('prfpdto') is not None else '',
+                            'venue': db.find('fcltynm').text if db.find('fcltynm') is not None else '',
+                            'poster': db.find('poster').text if db.find('poster') is not None else '',
+                            'genre': genre_name,
+                            'category': sub_category,  # 세부 장르
+                            'part': perf_part,  # 파트: concert / theater
+                            'state': db.find('prfstate').text if db.find('prfstate') is not None else '',
+                            'hash': perf_hash,
+                            'available_sites': [{
+                                'name': 'KOPIS',
+                                'link': '',
+                                'color': '#00d4ff'
+                            }]
+                        }
+                        merged_performances[perf_hash] = perf
+                        source_counts['kopis'] += 1
+            except Exception as e:
+                pass
 
         # 인터파크 데이터
         try:
@@ -597,6 +639,8 @@ def get_all_data():
                             'color': '#ff6464'
                         }]
                         item['hash'] = perf_hash
+                        if 'part' not in item:
+                            item['part'] = classify_part(item.get('name', ''))
                         merged_performances[perf_hash] = item
         except:
             pass
@@ -621,6 +665,8 @@ def get_all_data():
                             'color': '#00cd3c'
                         }]
                         item['hash'] = perf_hash
+                        if 'part' not in item:
+                            item['part'] = classify_part(item.get('name', ''))
                         merged_performances[perf_hash] = item
         except:
             pass
@@ -645,12 +691,18 @@ def get_all_data():
                             'color': '#ffc800'
                         }]
                         item['hash'] = perf_hash
+                        if 'part' not in item:
+                            item['part'] = classify_part(item.get('name', ''))
                         merged_performances[perf_hash] = item
         except:
             pass
 
         # 리스트로 변환
         performances_list = list(merged_performances.values())
+
+        # 파트 필터 적용
+        if part_filter:
+            performances_list = [p for p in performances_list if p.get('part') == part_filter]
 
         # 끝난 공연 제외 (종료일이 오늘 이전인 공연)
         today_str = datetime.now().strftime('%Y.%m.%d')
@@ -713,6 +765,179 @@ def get_all_data():
         return jsonify({'success': False, 'error': str(e)})
 
 
+# 이미지 캐시 설정
+IMAGE_CACHE_DIR = os.path.join(os.path.dirname(__file__), 'image_cache')
+IMAGE_CACHE_HOURS = 24  # 캐시 유효 시간
+
+# 캐시 폴더 생성
+if not os.path.exists(IMAGE_CACHE_DIR):
+    os.makedirs(IMAGE_CACHE_DIR)
+
+
+def cleanup_old_cache():
+    """오래된 캐시 파일 삭제 (24시간 이상)"""
+    try:
+        now = datetime.now()
+        for filename in os.listdir(IMAGE_CACHE_DIR):
+            filepath = os.path.join(IMAGE_CACHE_DIR, filename)
+            if os.path.isfile(filepath):
+                file_time = datetime.fromtimestamp(os.path.getmtime(filepath))
+                if (now - file_time).total_seconds() > IMAGE_CACHE_HOURS * 3600:
+                    os.remove(filepath)
+    except:
+        pass
+
+
+@app.route('/api/proxy/image')
+def proxy_image():
+    """외부 이미지 프록시 (캐싱 지원)"""
+    url = request.args.get('url', '')
+    if not url:
+        return '', 404
+
+    # URL을 해시로 변환하여 파일명 생성
+    url_hash = hashlib.md5(url.encode()).hexdigest()
+    ext = '.jpg'  # 기본 확장자
+    if '.png' in url.lower():
+        ext = '.png'
+    elif '.gif' in url.lower():
+        ext = '.gif'
+    elif '.webp' in url.lower():
+        ext = '.webp'
+
+    cache_path = os.path.join(IMAGE_CACHE_DIR, url_hash + ext)
+
+    # 캐시에 있으면 바로 반환
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path, 'rb') as f:
+                content = f.read()
+            content_type = 'image/jpeg'
+            if ext == '.png':
+                content_type = 'image/png'
+            elif ext == '.gif':
+                content_type = 'image/gif'
+            elif ext == '.webp':
+                content_type = 'image/webp'
+            return content, 200, {'Content-Type': content_type, 'Cache-Control': 'max-age=86400'}
+        except:
+            pass
+
+    # 캐시에 없으면 다운로드
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Referer': 'https://ticket.yes24.com/',
+            'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8'
+        }
+
+        # 멜론 이미지는 Referer 변경
+        if 'melon' in url:
+            headers['Referer'] = 'https://ticket.melon.com/'
+
+        response = requests.get(url, headers=headers, timeout=10)
+
+        if response.status_code == 200:
+            content = response.content
+            content_type = response.headers.get('Content-Type', 'image/jpeg')
+
+            # YES24 로고 이미지 감지 (약 5KB 미만이고 특정 패턴)
+            # 로고 이미지는 보통 작은 크기
+            if len(content) < 10000:  # 10KB 미만
+                # 이미지 해시로 로고 감지
+                img_hash = hashlib.md5(content).hexdigest()
+                # 알려진 로고 해시들 (필요시 추가)
+                logo_hashes = [
+                    '7f9b8c5a3d2e1f4b',  # 예시
+                ]
+                # 너무 작은 이미지는 로고로 간주
+                if len(content) < 3000:
+                    return '', 404
+
+            # 캐시에 저장
+            try:
+                with open(cache_path, 'wb') as f:
+                    f.write(content)
+            except:
+                pass
+
+            # 가끔 오래된 캐시 정리
+            if hash(url) % 100 == 0:
+                cleanup_old_cache()
+
+            return content, 200, {'Content-Type': content_type, 'Cache-Control': 'max-age=86400'}
+        else:
+            return '', response.status_code
+    except Exception as e:
+        return '', 500
+
+
+@app.route('/api/ticketing/detail')
+def get_ticket_detail():
+    """멜론/YES24 상세 정보 조회 (Selenium - subprocess)"""
+    try:
+        source = request.args.get('source', '')
+        link = request.args.get('link', '')
+
+        if not source or not link:
+            return jsonify({'success': False, 'error': 'source와 link 파라미터가 필요합니다.'})
+
+        script_path = os.path.join(os.path.dirname(__file__), 'selenium_crawler.py')
+
+        # 링크에서 ID 추출
+        if source == 'melon' or '멜론' in source:
+            # 멜론 링크에서 prodId 추출
+            import re
+            match = re.search(r'prodId=(\d+)', link)
+            if not match:
+                return jsonify({'success': False, 'error': 'prodId를 찾을 수 없습니다.'})
+            prod_id = match.group(1)
+
+            result = subprocess.run(
+                ['python', script_path, 'melon_detail', prod_id],
+                capture_output=True,
+                timeout=60,
+                cwd=os.path.dirname(__file__),
+                encoding='utf-8',
+                errors='replace'
+            )
+
+        elif source == 'yes24' or 'YES24' in source:
+            # YES24 링크에서 PerfCode 추출
+            import re
+            match = re.search(r'/Perf/(\d+)', link) or re.search(r'PerfCode=(\d+)', link)
+            if not match:
+                return jsonify({'success': False, 'error': 'PerfCode를 찾을 수 없습니다.'})
+            perf_code = match.group(1)
+
+            result = subprocess.run(
+                ['python', script_path, 'yes24_detail', perf_code],
+                capture_output=True,
+                timeout=60,
+                cwd=os.path.dirname(__file__),
+                encoding='utf-8',
+                errors='replace'
+            )
+
+        else:
+            return jsonify({'success': False, 'error': f'지원하지 않는 소스: {source}'})
+
+        if result.returncode == 0 and result.stdout:
+            data = json.loads(result.stdout)
+            return jsonify(data)
+        else:
+            return jsonify({
+                'success': False,
+                'error': result.stderr or 'No output',
+                'data': {}
+            })
+
+    except subprocess.TimeoutExpired:
+        return jsonify({'success': False, 'error': 'Timeout (1분 초과)', 'data': {}})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e), 'data': {}})
+
+
 @app.route('/api/search')
 def search_all():
     """통합 검색"""
@@ -766,9 +991,10 @@ def search_all():
 
 if __name__ == '__main__':
     print("=" * 50)
-    print("  티켓팅 통합 정보 시스템 v2.0")
+    print("  티켓팅 통합 정보 시스템 v3.0")
     print("  - KOPIS + 인터파크 + 멜론티켓 + YES24")
-    print("  - 중복 제거 / 상세 팝업 / 예매처 링크")
+    print("  - 콘서트 / 연극&뮤지컬 파트 분류")
+    print("  - 상세 크롤링 / 예매처 링크")
     print("=" * 50)
     print("  브라우저에서 http://localhost:5000 접속")
     print("=" * 50)
