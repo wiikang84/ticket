@@ -154,6 +154,50 @@ CONCERT_CATEGORIES = {
               "진해성", "남진", "나태주", "김수찬", "신유", "최진희", "박상철"]
 }
 
+# 지역 분류 키워드 매핑 (7개 권역)
+VENUE_REGION_KEYWORDS = {
+    '서울': ['서울', '예술의전당', '올림픽공원', '올림픽홀', '잠실', '블루스퀘어',
+             '세종문화회관', '세종문화', '국립극장', '대학로', 'LG아트센터', '샤롯데',
+             '광림아트', '고척스카이돔', '고척', 'KSPO', 'YES24 LIVE', 'KBS아레나',
+             'KBS 아레나', '장충체육관', '충무아트', '두산아트', 'COEX', '코엑스',
+             '롯데콘서트홀', '디큐브', '강동아트', '마포아트', '드림씨어터',
+             '무신사 가라지', '서울숲', '링크아트', '국립중앙', '남산'],
+    '경기·인천': ['인천', '경기', '킨텍스', 'KINTEX', '고양아람', '고양시', '수원',
+                 '성남아트', '성남시', '부천', '안산', '일산', '용인', '파주',
+                 '의정부', '화성', '평택', '안양', '광명', '이천', '시흥',
+                 '군포', '하남', '구리', '남양주', '양주', '포천', '동두천'],
+    '강원': ['강원', '춘천', '원주', '강릉', '속초', '동해', '삼척', '태백',
+            '정선', '평창', '횡성', '영월', '화천', '인제', '양양', '홍천'],
+    '충청': ['충청', '대전', '세종', '청주', '천안', '아산', '충북', '충남',
+            '서산', '당진', '공주', '보령', '논산', '제천', '충주', '옥천'],
+    '전라': ['전라', '광주', '전주', '여수', '순천', '목포', '전북', '전남',
+            '익산', '군산', '정읍', '남원', '나주', '무안', '광양'],
+    '경상': ['경상', '부산', '대구', '울산', '창원', '포항', '경주', '김해', '경북', '경남',
+            'BEXCO', '벡스코', '해운대', '김천', '안동', '구미', '영주',
+            '진주', '통영', '거제', '양산', '엑스코', 'EXCO', '대구콘서트'],
+    '제주': ['제주', '서귀포', '한라'],
+}
+
+def classify_region(venue_name='', area=''):
+    """공연장/지역으로 지역 분류 (7개 권역)"""
+    # 1. KOPIS area 필드 우선 사용
+    if area:
+        for region, keywords in VENUE_REGION_KEYWORDS.items():
+            for kw in keywords:
+                if kw in area:
+                    return region
+
+    # 2. 공연장 이름으로 분류
+    if venue_name:
+        venue_upper = venue_name.upper()
+        for region, keywords in VENUE_REGION_KEYWORDS.items():
+            for kw in keywords:
+                if kw.upper() in venue_upper:
+                    return region
+
+    return '서울'  # 기본값 (55% 서울)
+
+
 # 캐시 저장소 (하루 2회 업데이트용)
 cache = {
     'data': None,
@@ -403,6 +447,7 @@ def get_interpark_tickets():
                             'link': link,
                             'category': categorize_concert(goods_name),  # 세부 장르
                             'part': classify_part(goods_name),  # 파트: concert / theater
+                            'region': classify_region(place_name),  # 지역 분류
                             'ticket_open': ticket_open_fmt,
                             'dday': ticket_dday,
                             'hash': get_cache_key(goods_name)
@@ -557,6 +602,7 @@ def get_all_data():
         end_date = request.args.get('end_date', (datetime.now() + timedelta(days=60)).strftime('%Y%m%d'))
         genre = request.args.get('genre', '')
         part_filter = request.args.get('part', '')  # 파트 필터: concert / theater / (빈값=전체)
+        region_filter = request.args.get('region', '')  # 지역 필터: 서울 / 경기·인천 / ... / (빈값=전체)
 
         # 통합 공연 목록 (hash -> 공연 정보)
         merged_performances = {}
@@ -586,6 +632,8 @@ def get_all_data():
                     for db in root.findall('.//db'):
                         name = db.find('prfnm').text if db.find('prfnm') is not None else ''
                         genre_name = db.find('genrenm').text if db.find('genrenm') is not None else ''
+                        venue_name = db.find('fcltynm').text if db.find('fcltynm') is not None else ''
+                        area = db.find('area').text if db.find('area') is not None else ''
 
                         perf_hash = get_cache_key(normalize_name(name))
 
@@ -599,11 +647,12 @@ def get_all_data():
                             'name': name,
                             'start_date': db.find('prfpdfrom').text if db.find('prfpdfrom') is not None else '',
                             'end_date': db.find('prfpdto').text if db.find('prfpdto') is not None else '',
-                            'venue': db.find('fcltynm').text if db.find('fcltynm') is not None else '',
+                            'venue': venue_name,
                             'poster': db.find('poster').text if db.find('poster') is not None else '',
                             'genre': genre_name,
                             'category': sub_category,  # 세부 장르
                             'part': perf_part,  # 파트: concert / theater
+                            'region': classify_region(venue_name, area),  # 지역 분류
                             'state': db.find('prfstate').text if db.find('prfstate') is not None else '',
                             'hash': perf_hash,
                             'available_sites': [{
@@ -641,6 +690,8 @@ def get_all_data():
                         item['hash'] = perf_hash
                         if 'part' not in item:
                             item['part'] = classify_part(item.get('name', ''))
+                        if 'region' not in item:
+                            item['region'] = classify_region(item.get('venue', ''))
                         merged_performances[perf_hash] = item
         except:
             pass
@@ -667,6 +718,8 @@ def get_all_data():
                         item['hash'] = perf_hash
                         if 'part' not in item:
                             item['part'] = classify_part(item.get('name', ''))
+                        if 'region' not in item:
+                            item['region'] = classify_region(item.get('venue', ''))
                         merged_performances[perf_hash] = item
         except:
             pass
@@ -693,6 +746,8 @@ def get_all_data():
                         item['hash'] = perf_hash
                         if 'part' not in item:
                             item['part'] = classify_part(item.get('name', ''))
+                        if 'region' not in item:
+                            item['region'] = classify_region(item.get('venue', ''))
                         merged_performances[perf_hash] = item
         except:
             pass
@@ -703,6 +758,10 @@ def get_all_data():
         # 파트 필터 적용
         if part_filter:
             performances_list = [p for p in performances_list if p.get('part') == part_filter]
+
+        # 지역 필터 적용
+        if region_filter:
+            performances_list = [p for p in performances_list if p.get('region') == region_filter]
 
         # 끝난 공연 제외 (종료일이 오늘 이전인 공연)
         today_str = datetime.now().strftime('%Y.%m.%d')
