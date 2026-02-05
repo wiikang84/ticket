@@ -603,6 +603,7 @@ def get_all_data():
         genre = request.args.get('genre', '')
         part_filter = request.args.get('part', '')  # 파트 필터: concert / theater / (빈값=전체)
         region_filter = request.args.get('region', '')  # 지역 필터: 서울 / 경기·인천 / ... / (빈값=전체)
+        skip_selenium = request.args.get('skip_selenium', '') == 'true'  # Selenium 크롤링 스킵 (빠른 로딩용)
 
         # 통합 공연 목록 (hash -> 공연 정보)
         merged_performances = {}
@@ -696,61 +697,63 @@ def get_all_data():
         except:
             pass
 
-        # 멜론티켓 데이터
-        try:
-            melon_response = get_melon_tickets()
-            melon_data = melon_response.get_json()
-            if melon_data.get('success'):
-                for item in melon_data.get('data', []):
-                    perf_hash = get_cache_key(normalize_name(item.get('name', '')))
-                    source_counts['melon'] += 1
+        # 멜론티켓 데이터 (skip_selenium이면 건너뜀)
+        if not skip_selenium:
+            try:
+                melon_response = get_melon_tickets()
+                melon_data = melon_response.get_json()
+                if melon_data.get('success'):
+                    for item in melon_data.get('data', []):
+                        perf_hash = get_cache_key(normalize_name(item.get('name', '')))
+                        source_counts['melon'] += 1
 
-                    if perf_hash in merged_performances:
-                        merged_performances[perf_hash] = merge_performance_data(
-                            merged_performances[perf_hash], item, '멜론티켓'
-                        )
-                    else:
-                        item['available_sites'] = [{
-                            'name': '멜론티켓',
-                            'link': item.get('link', ''),
-                            'color': '#00cd3c'
-                        }]
-                        item['hash'] = perf_hash
-                        if 'part' not in item:
-                            item['part'] = classify_part(item.get('name', ''))
-                        if 'region' not in item:
-                            item['region'] = classify_region(item.get('venue', ''))
-                        merged_performances[perf_hash] = item
-        except:
-            pass
+                        if perf_hash in merged_performances:
+                            merged_performances[perf_hash] = merge_performance_data(
+                                merged_performances[perf_hash], item, '멜론티켓'
+                            )
+                        else:
+                            item['available_sites'] = [{
+                                'name': '멜론티켓',
+                                'link': item.get('link', ''),
+                                'color': '#00cd3c'
+                            }]
+                            item['hash'] = perf_hash
+                            if 'part' not in item:
+                                item['part'] = classify_part(item.get('name', ''))
+                            if 'region' not in item:
+                                item['region'] = classify_region(item.get('venue', ''))
+                            merged_performances[perf_hash] = item
+            except:
+                pass
 
-        # YES24 데이터
-        try:
-            yes24_response = get_yes24_tickets()
-            yes24_data = yes24_response.get_json()
-            if yes24_data.get('success'):
-                for item in yes24_data.get('data', []):
-                    perf_hash = get_cache_key(normalize_name(item.get('name', '')))
-                    source_counts['yes24'] += 1
+        # YES24 데이터 (skip_selenium이면 건너뜀)
+        if not skip_selenium:
+            try:
+                yes24_response = get_yes24_tickets()
+                yes24_data = yes24_response.get_json()
+                if yes24_data.get('success'):
+                    for item in yes24_data.get('data', []):
+                        perf_hash = get_cache_key(normalize_name(item.get('name', '')))
+                        source_counts['yes24'] += 1
 
-                    if perf_hash in merged_performances:
-                        merged_performances[perf_hash] = merge_performance_data(
-                            merged_performances[perf_hash], item, 'YES24'
-                        )
-                    else:
-                        item['available_sites'] = [{
-                            'name': 'YES24',
-                            'link': item.get('link', ''),
-                            'color': '#ffc800'
-                        }]
-                        item['hash'] = perf_hash
-                        if 'part' not in item:
-                            item['part'] = classify_part(item.get('name', ''))
-                        if 'region' not in item:
-                            item['region'] = classify_region(item.get('venue', ''))
-                        merged_performances[perf_hash] = item
-        except:
-            pass
+                        if perf_hash in merged_performances:
+                            merged_performances[perf_hash] = merge_performance_data(
+                                merged_performances[perf_hash], item, 'YES24'
+                            )
+                        else:
+                            item['available_sites'] = [{
+                                'name': 'YES24',
+                                'link': item.get('link', ''),
+                                'color': '#ffc800'
+                            }]
+                            item['hash'] = perf_hash
+                            if 'part' not in item:
+                                item['part'] = classify_part(item.get('name', ''))
+                            if 'region' not in item:
+                                item['region'] = classify_region(item.get('venue', ''))
+                            merged_performances[perf_hash] = item
+            except:
+                pass
 
         # 리스트로 변환
         performances_list = list(merged_performances.values())

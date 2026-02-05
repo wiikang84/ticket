@@ -783,21 +783,77 @@
             color: #888;
         }
 
-        .loading::after {
-            content: '';
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: #00d4ff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 15px;
-            vertical-align: middle;
-        }
-
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner-lg {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: #00d4ff;
+            border-right-color: #7c3aed;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 25px;
+        }
+
+        .loading-container h3 {
+            color: #fff;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+        }
+
+        .loading-steps {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .loading-step-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #666;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .loading-step-item.active {
+            color: #00d4ff;
+        }
+
+        .loading-step-item.done {
+            color: #00cd3c;
+        }
+
+        .loading-tip {
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .bg-loading-bar {
+            text-align: center;
+            padding: 10px 20px;
+            color: #888;
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            margin-bottom: 15px;
         }
 
         .empty-state {
@@ -1446,36 +1502,100 @@
             renderResults();
         }
 
-        // 전체 데이터 로드
+        // 전체 데이터 로드 (2단계: 빠른 로딩 → 백그라운드 추가)
         async function loadAllData() {
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '<div class="loading">데이터를 불러오는 중...</div>';
-
             const startDate = document.getElementById('startDate').value.replace(/-/g, '');
             const endDate = document.getElementById('endDate').value.replace(/-/g, '');
 
-            try {
-                const response = await fetch(`/api/all?start_date=${startDate}&end_date=${endDate}`);
-                const result = await response.json();
+            // 로딩 UI 표시
+            const tips = [
+                'KOPIS 공연예술통합전산망에서 데이터를 가져오고 있습니다...',
+                '인터파크 티켓 정보를 조회 중입니다...',
+                '공연 정보를 콘서트 / 연극&뮤지컬로 분류하고 있습니다...',
+                '서울, 경기, 강원 등 7개 권역으로 지역을 분류 중...',
+                '중복 공연을 정리하고 판매처를 통합하고 있습니다...',
+                '거의 다 됐어요! 조금만 더 기다려주세요...'
+            ];
 
-                if (result.success) {
-                    allData = result.data;  // 통합된 리스트
-                    // hash -> item 매핑 생성
+            resultsDiv.innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner-lg"></div>
+                    <h3>공연 정보를 불러오고 있습니다</h3>
+                    <div class="loading-steps">
+                        <div class="loading-step-item active" id="stepKopis">⏳ KOPIS 공연 데이터 조회 중...</div>
+                        <div class="loading-step-item" id="stepInterpark">⏳ 인터파크 티켓 조회 대기</div>
+                        <div class="loading-step-item" id="stepMelon">⏳ 멜론티켓 대기</div>
+                        <div class="loading-step-item" id="stepYes24">⏳ YES24 대기</div>
+                    </div>
+                    <div class="loading-tip" id="loadingTip">${tips[0]}</div>
+                </div>
+            `;
+
+            // 팁 로테이션
+            let tipIdx = 0;
+            const tipInterval = setInterval(() => {
+                tipIdx = (tipIdx + 1) % tips.length;
+                const el = document.getElementById('loadingTip');
+                if (el) el.textContent = tips[tipIdx];
+            }, 3000);
+
+            try {
+                // Phase 1: 빠른 로딩 (KOPIS + 인터파크만, Selenium 제외)
+                const fastResponse = await fetch(`/api/all?start_date=${startDate}&end_date=${endDate}&skip_selenium=true`);
+                const fastResult = await fastResponse.json();
+
+                clearInterval(tipInterval);
+
+                if (fastResult.success) {
+                    allData = fastResult.data;
                     allDataMap = {};
                     allData.forEach(item => {
                         if (item.hash) allDataMap[item.hash] = item;
                     });
-                    updateStats(result.stats);
-                    document.getElementById('updateInfo').textContent = `마지막 업데이트: ${result.timestamp}`;
+                    updateStats(fastResult.stats);
+                    document.getElementById('updateInfo').textContent = `마지막 업데이트: ${fastResult.timestamp}`;
                     renderResults();
-                    // 캘린더가 활성화되어 있으면 업데이트
                     if (currentView === 'calendar' && calendar) {
                         updateCalendarEvents();
                     }
+
+                    // Phase 2: 백그라운드에서 멜론/YES24 추가 로딩
+                    const bgBar = document.createElement('div');
+                    bgBar.id = 'bgLoadingBar';
+                    bgBar.className = 'bg-loading-bar';
+                    bgBar.innerHTML = '🔄 멜론티켓 · YES24 추가 데이터 로딩 중...';
+                    resultsDiv.parentNode.insertBefore(bgBar, resultsDiv);
+
+                    fetch(`/api/all?start_date=${startDate}&end_date=${endDate}`)
+                        .then(r => r.json())
+                        .then(fullResult => {
+                            const bar = document.getElementById('bgLoadingBar');
+                            if (bar) bar.remove();
+                            if (fullResult.success && fullResult.data.length > allData.length) {
+                                allData = fullResult.data;
+                                allDataMap = {};
+                                allData.forEach(item => {
+                                    if (item.hash) allDataMap[item.hash] = item;
+                                });
+                                updateStats(fullResult.stats);
+                                renderResults();
+                                if (currentView === 'calendar' && calendar) {
+                                    updateCalendarEvents();
+                                }
+                            } else if (bar) {
+                                bar.remove();
+                            }
+                        })
+                        .catch(() => {
+                            const bar = document.getElementById('bgLoadingBar');
+                            if (bar) bar.textContent = '⚠️ 멜론·YES24 추가 로딩 실패 (Selenium 필요)';
+                        });
                 } else {
-                    resultsDiv.innerHTML = `<div class="empty-state"><h3>오류 발생</h3><p>${result.error}</p></div>`;
+                    resultsDiv.innerHTML = `<div class="empty-state"><h3>오류 발생</h3><p>${fastResult.error}</p></div>`;
                 }
             } catch (error) {
+                clearInterval(tipInterval);
                 resultsDiv.innerHTML = `<div class="empty-state"><h3>오류 발생</h3><p>${error.message}</p></div>`;
             }
         }
