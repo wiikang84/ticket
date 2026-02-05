@@ -26,6 +26,11 @@ import threading
 import time as time_module
 import subprocess
 import os
+import logging
+
+# APScheduler (12시간 자동 업데이트)
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 # 크롬 드라이버 경로 캐시
 _chrome_driver_path = None
@@ -203,6 +208,14 @@ cache = {
     'data': None,
     'last_update': None
 }
+cache_lock = threading.Lock()
+
+# 스케줄러 로거
+scheduler_logger = logging.getLogger('scheduler')
+scheduler_logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter('[스케줄러] %(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
+scheduler_logger.addHandler(handler)
 
 
 def get_cache_key(data):
@@ -594,10 +607,189 @@ def merge_performance_data(base, new_item, source_name):
     return base
 
 
+def scheduled_update():
+    """스케줄러에 의해 실행: KOPIS + 인터파크 데이터 자동 수집 (Selenium 제외)"""
+    scheduler_logger.info("자동 업데이트 시작...")
+    try:
+        start_date = datetime.now().strftime('%Y%m%d')
+        end_date = (datetime.now() + timedelta(days=60)).strftime('%Y%m%d')
+        today_str = datetime.now().strftime('%Y.%m.%d')
+
+        merged_performances = {}
+        source_counts = {'kopis': 0, 'interpark': 0, 'melon': 0, 'yes24': 0}
+
+        # KOPIS 데이터 수집
+        kopis_genres = [
+            (GENRE_CODE_CONCERT, 'concert'),
+            (GENRE_CODE_MUSICAL, 'theater'),
+            (GENRE_CODE_THEATER, 'theater')
+        ]
+
+        for genre_code, part_type in kopis_genres:
+            try:
+                params = {
+                    'service': KOPIS_API_KEY,
+                    'stdate': start_date,
+                    'eddate': end_date,
+                    'cpage': '1',
+                    'rows': '50',
+                    'shcate': genre_code
+                }
+                response = requests.get(f"{KOPIS_BASE_URL}/pblprfr", params=params, timeout=10)
+                if response.status_code == 200:
+                    root = ET.fromstring(response.content)
+                    for db in root.findall('.//db'):
+                        name = db.find('prfnm').text if db.find('prfnm') is not None else ''
+                        genre_name = db.find('genrenm').text if db.find('genrenm') is not None else ''
+                        venue_name = db.find('fcltynm').text if db.find('fcltynm') is not None else ''
+                        area = db.find('area').text if db.find('area') is not None else ''
+                        perf_hash = get_cache_key(normalize_name(name))
+                        sub_category = categorize_concert(name)
+                        perf_part = classify_part(name, genre_name) if part_type == 'concert' else part_type
+
+                        perf = {
+                            'id': db.find('mt20id').text if db.find('mt20id') is not None else '',
+                            'name': name,
+                            'start_date': db.find('prfpdfrom').text if db.find('prfpdfrom') is not None else '',
+                            'end_date': db.find('prfpdto').text if db.find('prfpdto') is not None else '',
+                            'venue': venue_name,
+                            'poster': db.find('poster').text if db.find('poster') is not None else '',
+                            'genre': genre_name,
+                            'category': sub_category,
+                            'part': perf_part,
+                            'region': classify_region(venue_name, area),
+                            'state': db.find('prfstate').text if db.find('prfstate') is not None else '',
+                            'hash': perf_hash,
+                            'available_sites': [{'name': 'KOPIS', 'link': '', 'color': '#00d4ff'}]
+                        }
+                        merged_performances[perf_hash] = perf
+                        source_counts['kopis'] += 1
+            except Exception as e:
+                scheduler_logger.warning(f"KOPIS 수집 실패 ({genre_code}): {e}")
+
+        # 인터파크 데이터 수집
+        try:
+            with app.test_request_context():
+                interpark_response = get_interpark_tickets()
+                interpark_data = interpark_response.get_json()
+                if interpark_data.get('success'):
+                    for item in interpark_data.get('data', []):
+                        perf_hash = get_cache_key(normalize_name(item.get('name', '')))
+                        source_counts['interpark'] += 1
+                        if perf_hash in merged_performances:
+                            merged_performances[perf_hash] = merge_performance_data(
+                                merged_performances[perf_hash], item, '인터파크'
+                            )
+                        else:
+                            item['available_sites'] = [{'name': '인터파크', 'link': item.get('link', ''), 'color': '#ff6464'}]
+                            item['hash'] = perf_hash
+                            if 'part' not in item:
+                                item['part'] = classify_part(item.get('name', ''))
+                            if 'region' not in item:
+                                item['region'] = classify_region(item.get('venue', ''))
+                            merged_performances[perf_hash] = item
+        except Exception as e:
+            scheduler_logger.warning(f"인터파크 수집 실패: {e}")
+
+        # 종료된 공연 필터링
+        performances_list = list(merged_performances.values())
+        filtered_list = []
+        for p in performances_list:
+            end_date_val = p.get('end_date') or p.get('start_date') or p.get('date', '')
+            if end_date_val:
+                end_clean = re.sub(r'[^\d.]', '', end_date_val)[:10]
+                if len(end_clean) >= 8:
+                    try:
+                        if '.' in end_clean:
+                            parts = end_clean.split('.')
+                            if len(parts) >= 3:
+                                end_formatted = f"{parts[0]}.{parts[1].zfill(2)}.{parts[2].zfill(2)}"
+                        else:
+                            end_formatted = f"{end_clean[:4]}.{end_clean[4:6]}.{end_clean[6:8]}"
+                        if end_formatted >= today_str:
+                            filtered_list.append(p)
+                        continue
+                    except:
+                        pass
+            filtered_list.append(p)
+
+        # 정렬 (D-day 순)
+        def sort_key(p):
+            dday = p.get('dday')
+            if dday is not None and dday >= 0:
+                return (0, dday)
+            elif p.get('start_date'):
+                try:
+                    date_str = p['start_date'].replace('.', '')
+                    return (1, int(date_str))
+                except:
+                    return (2, 0)
+            return (2, 0)
+
+        filtered_list.sort(key=sort_key)
+
+        # 캐시에 저장
+        with cache_lock:
+            cache['data'] = {
+                'success': True,
+                'data': filtered_list,
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'stats': {
+                    'kopis': source_counts['kopis'],
+                    'interpark': source_counts['interpark'],
+                    'melon': source_counts['melon'],
+                    'yes24': source_counts['yes24'],
+                    'total': len(filtered_list)
+                }
+            }
+            cache['last_update'] = datetime.now()
+
+        scheduler_logger.info(f"자동 업데이트 완료: {len(filtered_list)}건 (KOPIS: {source_counts['kopis']}, 인터파크: {source_counts['interpark']})")
+
+    except Exception as e:
+        scheduler_logger.error(f"자동 업데이트 오류: {e}")
+
+
+def init_scheduler():
+    """APScheduler 초기화: 매일 00시, 12시 실행"""
+    scheduler = BackgroundScheduler(daemon=True)
+    # 매일 00:00 실행
+    scheduler.add_job(scheduled_update, CronTrigger(hour=0, minute=0), id='update_00', replace_existing=True)
+    # 매일 12:00 실행
+    scheduler.add_job(scheduled_update, CronTrigger(hour=12, minute=0), id='update_12', replace_existing=True)
+    scheduler.start()
+    scheduler_logger.info("APScheduler 시작 (00시, 12시 자동 업데이트)")
+    return scheduler
+
+
+@app.route('/api/cache/status')
+def cache_status():
+    """캐시 상태 확인 API"""
+    with cache_lock:
+        last_update = cache['last_update']
+        data_count = len(cache['data']['data']) if cache['data'] else 0
+
+    return jsonify({
+        'has_cache': cache['data'] is not None,
+        'last_update': last_update.strftime('%Y-%m-%d %H:%M:%S') if last_update else None,
+        'data_count': data_count,
+        'cache_age_minutes': round((datetime.now() - last_update).total_seconds() / 60, 1) if last_update else None
+    })
+
+
 @app.route('/api/all')
 def get_all_data():
     """모든 소스에서 데이터 통합 조회 (공연 기준 통합 + 판매처 표시)"""
     try:
+        # 캐시가 12시간 이내면 캐시 데이터 즉시 반환 (빠른 응답)
+        skip_selenium = request.args.get('skip_selenium', '') == 'true'
+        with cache_lock:
+            if cache['data'] and cache['last_update']:
+                cache_age = (datetime.now() - cache['last_update']).total_seconds()
+                if cache_age < 12 * 3600 and skip_selenium:
+                    # 캐시 데이터에서 파트/지역 필터는 프론트에서 처리하므로 그대로 반환
+                    return jsonify(cache['data'])
+
         start_date = request.args.get('start_date', datetime.now().strftime('%Y%m%d'))
         end_date = request.args.get('end_date', (datetime.now() + timedelta(days=60)).strftime('%Y%m%d'))
         genre = request.args.get('genre', '')
@@ -1051,6 +1243,21 @@ def search_all():
     return jsonify({'success': True, 'data': results})
 
 
+# gunicorn 호환: 모듈 로드 시 스케줄러 자동 시작
+_scheduler = None
+
+def start_scheduler_once():
+    """스케줄러 1회만 시작 (중복 방지)"""
+    global _scheduler
+    if _scheduler is None:
+        _scheduler = init_scheduler()
+        # 최초 1회 데이터 갱신 (백그라운드)
+        threading.Thread(target=scheduled_update, daemon=True).start()
+
+# gunicorn으로 실행 시에도 스케줄러 시작
+start_scheduler_once()
+
+
 if __name__ == '__main__':
     import socket
     hostname = socket.gethostname()
@@ -1058,12 +1265,14 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
 
     print("=" * 50)
-    print("  티켓팅 통합 정보 시스템 v3.1")
+    print("  티켓팅 통합 정보 시스템 v3.3")
     print("  - KOPIS + 인터파크 + 멜론티켓 + YES24")
     print("  - 콘서트 / 연극&뮤지컬 파트 분류")
     print("  - 7개 권역 지역 필터")
+    print("  - 12시간 자동 업데이트 (APScheduler)")
+    print("  - 브라우저 알림 (찜 기능)")
     print("=" * 50)
     print(f"  PC: http://localhost:{port}")
     print(f"  모바일: http://{local_ip}:{port}")
     print("=" * 50)
-    app.run(debug=True, port=port, host='0.0.0.0')
+    app.run(debug=True, port=port, host='0.0.0.0', use_reloader=False)

@@ -1087,6 +1087,175 @@
             color: #000;
         }
 
+        /* 찜(하트) 버튼 */
+        .fav-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: #aaa;
+            font-size: 1.1rem;
+            cursor: pointer;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .fav-btn:hover {
+            transform: scale(1.15);
+            border-color: #ff4081;
+        }
+
+        .fav-btn.active {
+            background: rgba(255, 64, 129, 0.9);
+            border-color: #ff4081;
+            color: #fff;
+        }
+
+        /* 모달 찜 버튼 */
+        .modal-fav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #aaa;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .modal-fav-btn.active {
+            background: rgba(255, 64, 129, 0.2);
+            border-color: #ff4081;
+            color: #ff4081;
+        }
+
+        /* 알림 바 */
+        .noti-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+        }
+
+        .noti-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .noti-bar-label {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        /* 토글 스위치 */
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            cursor: pointer;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.15);
+            border-radius: 13px;
+            transition: 0.3s;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: #ff4081;
+        }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(22px);
+        }
+
+        /* 관심 공연 배지 */
+        .fav-count-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(255, 64, 129, 0.15);
+            border: 1px solid rgba(255, 64, 129, 0.3);
+            color: #ff4081;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .fav-count-badge:hover {
+            background: rgba(255, 64, 129, 0.25);
+        }
+
+        .fav-count-badge.filter-active {
+            background: #ff4081;
+            color: #fff;
+            border-color: #ff4081;
+        }
+
+        /* 모바일 반응형 추가 */
+        @media (max-width: 768px) {
+            .fav-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+
+            .noti-bar {
+                padding: 10px 14px;
+                gap: 8px;
+            }
+
+            .noti-bar-label {
+                font-size: 0.8rem;
+            }
+
+            .fav-count-badge {
+                font-size: 0.75rem;
+                padding: 4px 10px;
+            }
+        }
+
         footer {
             text-align: center;
             padding: 40px;
@@ -1146,6 +1315,21 @@
         <div class="view-tabs">
             <button class="view-tab active" onclick="switchView('list', this)">📋 목록 보기</button>
             <button class="view-tab" onclick="switchView('calendar', this)">📅 캘린더 보기</button>
+        </div>
+
+        <!-- 알림 바 -->
+        <div class="noti-bar" id="notiBar">
+            <div class="noti-bar-left">
+                <span class="noti-bar-label">알림</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="notiToggle" onchange="toggleNotification(this.checked)">
+                    <span class="toggle-slider"></span>
+                </label>
+                <span class="noti-bar-label" id="notiStatus" style="color: #666; font-size: 0.8rem;">비활성</span>
+            </div>
+            <div class="fav-count-badge" id="favCountBadge" onclick="toggleFavFilter()">
+                ♥ 관심 <span id="favCount">0</span>건
+            </div>
         </div>
 
         <!-- 목록 뷰 -->
@@ -1288,9 +1472,9 @@
     </div>
 
     <footer>
-        <p>공연 통합 정보 시스템 v3.1</p>
+        <p>공연 통합 정보 시스템 v3.3</p>
         <p style="margin-top: 10px; font-size: 0.85rem;">데이터 출처: KOPIS(공연예술통합전산망), 인터파크, 멜론티켓, YES24</p>
-        <p style="margin-top: 5px; font-size: 0.8rem; color: #555;">콘서트 / 연극 & 뮤지컬 파트 분류 · 7개 권역 지역 필터</p>
+        <p style="margin-top: 5px; font-size: 0.8rem; color: #555;">콘서트 / 연극 & 뮤지컬 파트 분류 · 7개 권역 지역 필터 · 12시간 자동 업데이트 · 찜/알림</p>
     </footer>
 
     <script>
@@ -1310,6 +1494,7 @@
         let currentView = 'list';  // 현재 뷰: list, calendar
         let currentCalendarType = 'ticket';  // 캘린더 타입: ticket, concert
         let calendar = null;  // FullCalendar 인스턴스
+        let favFilterActive = false;  // 관심 공연만 보기 필터
 
         // 홈으로 이동 (초기화)
         function goHome() {
@@ -1709,6 +1894,12 @@
                 filteredData = filteredData.filter(item => item.category === currentFilter);
             }
 
+            // 6. 관심 공연만 보기 필터
+            if (favFilterActive) {
+                const favs = getFavorites();
+                filteredData = filteredData.filter(item => item.hash && favs[item.hash]);
+            }
+
             if (filteredData.length > 0) {
                 html += `
                     <div class="source-section">
@@ -1731,12 +1922,15 @@
                         posterUrl = '/api/proxy/image?url=' + encodeURIComponent(posterUrl);
                     }
 
+                    const isFav = isFavorite(item.hash);
+
                     html += `
                         <div class="card" data-hash="${item.hash}">
                             <div class="card-img">
                                 ${posterUrl ? `<img src="${posterUrl}" alt="${item.name}" loading="lazy" onerror="this.onerror=null; this.style.display='none'; this.parentElement.classList.add('no-poster');">` : ''}
                                 ${ddayBadge}
                                 ${categoryBadge}
+                                <button class="fav-btn ${isFav ? 'active' : ''}" data-hash="${item.hash}" onclick="event.stopPropagation(); toggleFavorite('${item.hash}', this);" title="관심 등록">${isFav ? '♥' : '♡'}</button>
                             </div>
                             <div class="card-body">
                                 <div class="card-title">${item.name || '제목 없음'}</div>
@@ -1775,8 +1969,9 @@
         async function showDetail(item) {
             const modal = document.getElementById('modalOverlay');
 
-            // 기본 정보 설정
-            document.getElementById('modalTitle').textContent = item.name || '공연명 없음';
+            // 기본 정보 설정 + 찜 버튼
+            const isFav = isFavorite(item.hash);
+            document.getElementById('modalTitle').innerHTML = `${item.name || '공연명 없음'}<button class="modal-fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${item.hash}', this, true)">${isFav ? '♥ 찜 해제' : '♡ 찜하기'}</button>`;
             document.getElementById('modalVenue').textContent = item.venue || '-';
             document.getElementById('modalGenre').textContent = item.genre || '-';
             document.getElementById('modalState').textContent = item.state || '-';
@@ -1923,8 +2118,254 @@
             }
         });
 
+        // =============================================
+        // 관심 공연 (찜) 관리 - LocalStorage
+        // =============================================
+
+        function getFavorites() {
+            try {
+                return JSON.parse(localStorage.getItem('ticket_favorites') || '{}');
+            } catch { return {}; }
+        }
+
+        function saveFavorites(favs) {
+            localStorage.setItem('ticket_favorites', JSON.stringify(favs));
+        }
+
+        function isFavorite(hash) {
+            if (!hash) return false;
+            const favs = getFavorites();
+            return !!favs[hash];
+        }
+
+        function toggleFavorite(hash, btnEl, isModal) {
+            if (!hash) return;
+            const favs = getFavorites();
+            const item = allDataMap[hash];
+
+            if (favs[hash]) {
+                // 찜 해제
+                delete favs[hash];
+                if (btnEl) {
+                    if (isModal) {
+                        btnEl.classList.remove('active');
+                        btnEl.innerHTML = '♡ 찜하기';
+                    } else {
+                        btnEl.classList.remove('active');
+                        btnEl.textContent = '♡';
+                    }
+                }
+            } else {
+                // 찜 등록
+                if (item) {
+                    favs[hash] = {
+                        name: item.name || '',
+                        ticket_open: item.ticket_open || '',
+                        dday: item.dday,
+                        start_date: item.start_date || '',
+                        venue: item.venue || ''
+                    };
+                }
+                if (btnEl) {
+                    if (isModal) {
+                        btnEl.classList.add('active');
+                        btnEl.innerHTML = '♥ 찜 해제';
+                    } else {
+                        btnEl.classList.add('active');
+                        btnEl.textContent = '♥';
+                    }
+                }
+            }
+
+            saveFavorites(favs);
+            updateFavCount();
+
+            // 카드의 찜 버튼 상태도 동기화
+            if (isModal) {
+                const cardBtn = document.querySelector(`.fav-btn[data-hash="${hash}"]`);
+                if (cardBtn) {
+                    if (favs[hash]) {
+                        cardBtn.classList.add('active');
+                        cardBtn.textContent = '♥';
+                    } else {
+                        cardBtn.classList.remove('active');
+                        cardBtn.textContent = '♡';
+                    }
+                }
+            }
+        }
+
+        function updateFavCount() {
+            const favs = getFavorites();
+            const count = Object.keys(favs).length;
+            document.getElementById('favCount').textContent = count;
+        }
+
+        function toggleFavFilter() {
+            favFilterActive = !favFilterActive;
+            const badge = document.getElementById('favCountBadge');
+            if (favFilterActive) {
+                badge.classList.add('filter-active');
+            } else {
+                badge.classList.remove('filter-active');
+            }
+            renderResults();
+        }
+
+
+        // =============================================
+        // 브라우저 알림 (Notification API)
+        // =============================================
+
+        let notiCheckInterval = null;
+
+        function toggleNotification(enabled) {
+            const statusEl = document.getElementById('notiStatus');
+
+            if (enabled) {
+                // 브라우저 알림 권한 요청
+                if (!('Notification' in window)) {
+                    alert('이 브라우저는 알림을 지원하지 않습니다.');
+                    document.getElementById('notiToggle').checked = false;
+                    return;
+                }
+
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        localStorage.setItem('ticket_noti_enabled', 'true');
+                        statusEl.textContent = '활성';
+                        statusEl.style.color = '#ff4081';
+                        startNotiCheck();
+                    } else {
+                        document.getElementById('notiToggle').checked = false;
+                        localStorage.setItem('ticket_noti_enabled', 'false');
+                        statusEl.textContent = '권한 거부됨';
+                        statusEl.style.color = '#ff4444';
+                    }
+                });
+            } else {
+                localStorage.setItem('ticket_noti_enabled', 'false');
+                statusEl.textContent = '비활성';
+                statusEl.style.color = '#666';
+                stopNotiCheck();
+            }
+        }
+
+        function startNotiCheck() {
+            // 30분마다 D-day 체크
+            if (notiCheckInterval) clearInterval(notiCheckInterval);
+            checkFavoriteDdays(); // 즉시 1회 체크
+            notiCheckInterval = setInterval(checkFavoriteDdays, 30 * 60 * 1000);
+        }
+
+        function stopNotiCheck() {
+            if (notiCheckInterval) {
+                clearInterval(notiCheckInterval);
+                notiCheckInterval = null;
+            }
+        }
+
+        function checkFavoriteDdays() {
+            if (localStorage.getItem('ticket_noti_enabled') !== 'true') return;
+            if (Notification.permission !== 'granted') return;
+
+            const favs = getFavorites();
+            const todayKey = new Date().toISOString().split('T')[0].replace(/-/g, '.');
+            const notifiedKey = `ticket_notified_${todayKey}`;
+
+            // 오늘 이미 알림 보낸 목록
+            let notified = {};
+            try {
+                notified = JSON.parse(localStorage.getItem(notifiedKey) || '{}');
+            } catch { notified = {}; }
+
+            for (const [hash, info] of Object.entries(favs)) {
+                if (notified[hash]) continue; // 하루 1회 중복 방지
+
+                const dday = info.dday;
+                // ticket_open이 있으면 실시간으로 D-day 재계산
+                let currentDday = dday;
+                if (info.ticket_open) {
+                    const match = info.ticket_open.match(/(\d{4})\.(\d{2})\.(\d{2})/);
+                    if (match) {
+                        const target = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        currentDday = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+                    }
+                }
+
+                // D-1 또는 D-Day에만 알림
+                if (currentDday === 1 || currentDday === 0) {
+                    const title = currentDday === 0 ? '오늘 예매 오픈!' : '내일 예매 오픈!';
+                    const body = `${info.name}\n${info.ticket_open || ''} | ${info.venue || ''}`;
+
+                    const notification = new Notification(title, {
+                        body: body,
+                        icon: '🎫',
+                        tag: hash,
+                        requireInteraction: true
+                    });
+
+                    notification.onclick = function() {
+                        window.focus();
+                        // 해당 공연 상세 팝업 열기
+                        const item = allDataMap[hash];
+                        if (item) showDetail(item);
+                        notification.close();
+                    };
+
+                    // 알림 발송 기록
+                    notified[hash] = true;
+                    localStorage.setItem(notifiedKey, JSON.stringify(notified));
+                }
+            }
+
+            // 오래된 알림 기록 정리 (3일 이전 것 삭제)
+            cleanupOldNotifiedRecords();
+        }
+
+        function cleanupOldNotifiedRecords() {
+            const today = new Date();
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('ticket_notified_')) {
+                    const dateStr = key.replace('ticket_notified_', '');
+                    try {
+                        const parts = dateStr.split('.');
+                        const recordDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                        const daysDiff = Math.floor((today - recordDate) / (1000 * 60 * 60 * 24));
+                        if (daysDiff > 3) {
+                            localStorage.removeItem(key);
+                        }
+                    } catch {}
+                }
+            }
+        }
+
+        // 알림 초기 상태 복원
+        function initNotification() {
+            const enabled = localStorage.getItem('ticket_noti_enabled') === 'true';
+            const toggle = document.getElementById('notiToggle');
+            const statusEl = document.getElementById('notiStatus');
+
+            if (enabled && Notification.permission === 'granted') {
+                toggle.checked = true;
+                statusEl.textContent = '활성';
+                statusEl.style.color = '#ff4081';
+                startNotiCheck();
+            } else {
+                toggle.checked = false;
+                localStorage.setItem('ticket_noti_enabled', 'false');
+            }
+
+            updateFavCount();
+        }
+
+
         // 페이지 로드 시 자동 조회
         window.onload = function() {
+            initNotification();
             loadAllData();
         };
     </script>
