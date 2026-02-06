@@ -2219,8 +2219,25 @@
 
         let notiCheckInterval = null;
 
+        // 기기 감지: iOS 또는 네이버앱인지 확인
+        function isUnsupportedDevice() {
+            const ua = navigator.userAgent || '';
+            const isIOS = /iPhone|iPad|iPod/i.test(ua);
+            const isNaverApp = /NAVER/i.test(ua);
+            return isIOS || isNaverApp;
+        }
+
         function toggleNotification(enabled) {
             const statusEl = document.getElementById('notiStatus');
+
+            // iOS/네이버앱은 알림 미지원
+            if (isUnsupportedDevice()) {
+                alert('iOS 또는 네이버 앱에서는 브라우저 알림이 지원되지 않습니다.\n\nSafari에서 홈 화면에 추가하거나, Chrome/Samsung 브라우저를 이용해주세요.');
+                document.getElementById('notiToggle').checked = false;
+                statusEl.textContent = '미지원 기기';
+                statusEl.style.color = '#ff4444';
+                return;
+            }
 
             if (enabled) {
                 // 브라우저 알림 권한 요청
@@ -2345,9 +2362,19 @@
 
         // 알림 초기 상태 복원
         function initNotification() {
-            const enabled = localStorage.getItem('ticket_noti_enabled') === 'true';
             const toggle = document.getElementById('notiToggle');
             const statusEl = document.getElementById('notiStatus');
+
+            // iOS/네이버앱은 알림 UI 비활성화
+            if (isUnsupportedDevice()) {
+                toggle.disabled = true;
+                statusEl.textContent = '미지원 기기';
+                statusEl.style.color = '#888';
+                updateFavCount();
+                return;
+            }
+
+            const enabled = localStorage.getItem('ticket_noti_enabled') === 'true';
 
             if (enabled && Notification.permission === 'granted') {
                 toggle.checked = true;
