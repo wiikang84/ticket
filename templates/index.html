@@ -59,6 +59,29 @@
             box-shadow: 0 5px 20px rgba(0,212,255,0.4);
         }
 
+        /* 언어 선택 */
+        .lang-selector {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .lang-selector select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .lang-selector select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
         header h1 {
             font-size: 2.5rem;
             background: linear-gradient(90deg, #00d4ff, #7c3aed);
@@ -1287,34 +1310,43 @@
     <div class="container">
         <header>
             <button class="home-btn" onclick="goHome()" title="홈으로">🏠</button>
-            <h1>공연 통합 정보</h1>
-            <p>콘서트 · 뮤지컬 · 연극 · K-POP · 내한공연</p>
-            <div class="update-info" id="updateInfo">마지막 업데이트: -</div>
+            <div class="lang-selector">
+                <select id="langSelect" onchange="changeLanguage(this.value)">
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="en">🇺🇸 English</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 Español</option>
+                </select>
+            </div>
+            <h1 data-i18n="title">공연 통합 정보</h1>
+            <p data-i18n="subtitle">콘서트 · 뮤지컬 · 연극 · K-POP · 내한공연</p>
+            <div class="update-info" id="updateInfo" data-i18n="lastUpdate">마지막 업데이트: -</div>
         </header>
 
         <div class="search-box">
-            <h2>공연 검색</h2>
+            <h2 data-i18n="search">공연 검색</h2>
             <div class="search-form">
                 <div class="form-group">
-                    <label>검색어</label>
-                    <input type="text" id="keyword" placeholder="아티스트, 공연명 입력...">
+                    <label data-i18n="keyword">검색어</label>
+                    <input type="text" id="keyword" data-i18n-placeholder="keywordPlaceholder" placeholder="아티스트, 공연명 입력...">
                 </div>
                 <div class="form-group">
-                    <label>시작일</label>
+                    <label data-i18n="startDate">시작일</label>
                     <input type="date" id="startDate">
                 </div>
                 <div class="form-group">
-                    <label>종료일</label>
+                    <label data-i18n="endDate">종료일</label>
                     <input type="date" id="endDate">
                 </div>
-                <button class="btn btn-primary" onclick="loadAllData()">검색</button>
+                <button class="btn btn-primary" onclick="loadAllData()" data-i18n="searchBtn">검색</button>
             </div>
         </div>
 
         <!-- 뷰 전환: 목록 / 캘린더 -->
         <div class="view-tabs">
-            <button class="view-tab active" onclick="switchView('list', this)">📋 목록 보기</button>
-            <button class="view-tab" onclick="switchView('calendar', this)">📅 캘린더 보기</button>
+            <button class="view-tab active" onclick="switchView('list', this)" data-i18n="listView">📋 목록 보기</button>
+            <button class="view-tab" onclick="switchView('calendar', this)" data-i18n="calendarView">📅 캘린더 보기</button>
         </div>
 
         <!-- 알림 바 -->
@@ -1336,29 +1368,29 @@
         <div id="listView" class="list-view">
             <!-- 메인 파트 탭 -->
             <div class="part-tabs">
-                <button class="part-tab active" onclick="switchPart('concert', this)">🎤 콘서트</button>
-                <button class="part-tab" onclick="switchPart('theater', this)">🎭 연극 & 뮤지컬</button>
+                <button class="part-tab active" onclick="switchPart('concert', this)" data-i18n="concert">🎤 콘서트</button>
+                <button class="part-tab" onclick="switchPart('theater', this)" data-i18n="theater">🎭 연극 & 뮤지컬</button>
             </div>
 
             <!-- 소스 필터 탭 -->
             <div class="source-tabs">
-                <button class="source-tab active" onclick="filterSource('all', this)">전체</button>
+                <button class="source-tab active" onclick="filterSource('all', this)" data-i18n="all">전체</button>
                 <button class="source-tab" onclick="filterSource('KOPIS', this)" style="border-color: #00d4ff;">KOPIS</button>
-                <button class="source-tab" onclick="filterSource('인터파크', this)" style="border-color: #ff6464;">인터파크</button>
-                <button class="source-tab" onclick="filterSource('멜론티켓', this)" style="border-color: #00cd3c;">멜론</button>
+                <button class="source-tab" onclick="filterSource('인터파크', this)" style="border-color: #ff6464;" data-i18n="interpark">인터파크</button>
+                <button class="source-tab" onclick="filterSource('멜론티켓', this)" style="border-color: #00cd3c;" data-i18n="melon">멜론</button>
                 <button class="source-tab" onclick="filterSource('YES24', this)" style="border-color: #ffc800;">YES24</button>
             </div>
 
             <!-- 지역 필터 탭 -->
             <div class="region-tabs" id="regionTabs">
-                <button class="region-tab active" onclick="filterRegion('all', this)">전체</button>
-                <button class="region-tab" onclick="filterRegion('서울', this)">서울</button>
-                <button class="region-tab" onclick="filterRegion('경기·인천', this)">경기·인천</button>
-                <button class="region-tab" onclick="filterRegion('강원', this)">강원</button>
-                <button class="region-tab" onclick="filterRegion('충청', this)">충청</button>
-                <button class="region-tab" onclick="filterRegion('전라', this)">전라</button>
-                <button class="region-tab" onclick="filterRegion('경상', this)">경상</button>
-                <button class="region-tab" onclick="filterRegion('제주', this)">제주</button>
+                <button class="region-tab active" onclick="filterRegion('all', this)" data-i18n="all">전체</button>
+                <button class="region-tab" onclick="filterRegion('서울', this)" data-i18n="seoul">서울</button>
+                <button class="region-tab" onclick="filterRegion('경기·인천', this)" data-i18n="gyeonggi">경기·인천</button>
+                <button class="region-tab" onclick="filterRegion('강원', this)" data-i18n="gangwon">강원</button>
+                <button class="region-tab" onclick="filterRegion('충청', this)" data-i18n="chungcheong">충청</button>
+                <button class="region-tab" onclick="filterRegion('전라', this)" data-i18n="jeolla">전라</button>
+                <button class="region-tab" onclick="filterRegion('경상', this)" data-i18n="gyeongsang">경상</button>
+                <button class="region-tab" onclick="filterRegion('제주', this)" data-i18n="jeju">제주</button>
             </div>
 
             <!-- 콘서트 세부 장르 탭 (콘서트 파트에서만 표시) -->
@@ -1478,6 +1510,356 @@
     </footer>
 
     <script>
+        // =============================================
+        // 다국어 지원 (i18n)
+        // =============================================
+        const i18n = {
+            ko: {
+                title: '공연 통합 정보',
+                subtitle: '콘서트 · 뮤지컬 · 연극 · K-POP · 내한공연',
+                lastUpdate: '마지막 업데이트',
+                search: '공연 검색',
+                keyword: '검색어',
+                keywordPlaceholder: '아티스트, 공연명 입력...',
+                startDate: '시작일',
+                endDate: '종료일',
+                searchBtn: '검색',
+                listView: '📋 목록 보기',
+                calendarView: '📅 캘린더 보기',
+                concert: '🎤 콘서트',
+                theater: '🎭 연극 & 뮤지컬',
+                all: '전체',
+                interpark: '인터파크',
+                melon: '멜론',
+                seoul: '서울',
+                gyeonggi: '경기·인천',
+                gangwon: '강원',
+                chungcheong: '충청',
+                jeolla: '전라',
+                gyeongsang: '경상',
+                jeju: '제주',
+                notification: '알림',
+                inactive: '비활성',
+                active: '활성',
+                unsupportedDevice: '미지원 기기',
+                favorites: '관심',
+                total: '전체',
+                venue: '장소',
+                period: '기간',
+                date: '날짜',
+                ticketOpen: '티켓오픈',
+                noResults: '결과가 없습니다',
+                tryOther: '다른 검색어나 날짜로 시도해보세요.',
+                loading: '공연 정보를 불러오고 있습니다',
+                loadingKopis: 'KOPIS 공연 데이터 조회 중...',
+                performanceList: '공연 목록',
+                sortByDday: 'D-day 순 정렬',
+                ticketOpenCalendar: '🎫 예매오픈 캘린더',
+                concertCalendar: '🎤 공연일정 캘린더',
+                genre: '장르',
+                price: '가격',
+                cast: '출연',
+                status: '상태',
+                booking: '예매',
+                noTitle: '제목 없음',
+                addFavorite: '관심 등록',
+                removeFavorite: '찜 해제',
+                addToFavorite: '찜하기',
+                count: '건',
+                idol: '아이돌',
+                ballad: '발라드',
+                hiphop: '랩/힙합',
+                rock: '락/인디',
+                worldtour: '내한공연',
+                fanmeeting: '팬미팅',
+                festival: '페스티벌',
+                trot: '트로트',
+                etc: '기타'
+            },
+            en: {
+                title: 'Performance Info',
+                subtitle: 'Concert · Musical · Theater · K-POP · World Tour',
+                lastUpdate: 'Last Update',
+                search: 'Search',
+                keyword: 'Keyword',
+                keywordPlaceholder: 'Enter artist or show name...',
+                startDate: 'Start Date',
+                endDate: 'End Date',
+                searchBtn: 'Search',
+                listView: '📋 List View',
+                calendarView: '📅 Calendar View',
+                concert: '🎤 Concert',
+                theater: '🎭 Theater & Musical',
+                all: 'All',
+                interpark: 'Interpark',
+                melon: 'Melon',
+                seoul: 'Seoul',
+                gyeonggi: 'Gyeonggi',
+                gangwon: 'Gangwon',
+                chungcheong: 'Chungcheong',
+                jeolla: 'Jeolla',
+                gyeongsang: 'Gyeongsang',
+                jeju: 'Jeju',
+                notification: 'Notification',
+                inactive: 'Inactive',
+                active: 'Active',
+                unsupportedDevice: 'Unsupported',
+                favorites: 'Favorites',
+                total: 'Total',
+                venue: 'Venue',
+                period: 'Period',
+                date: 'Date',
+                ticketOpen: 'Ticket Open',
+                noResults: 'No results found',
+                tryOther: 'Try different keywords or dates.',
+                loading: 'Loading performance data',
+                loadingKopis: 'Fetching KOPIS data...',
+                performanceList: 'Performance List',
+                sortByDday: 'Sorted by D-day',
+                ticketOpenCalendar: '🎫 Ticket Open Calendar',
+                concertCalendar: '🎤 Concert Calendar',
+                genre: 'Genre',
+                price: 'Price',
+                cast: 'Cast',
+                status: 'Status',
+                booking: 'Book',
+                noTitle: 'No Title',
+                addFavorite: 'Add Favorite',
+                removeFavorite: 'Remove Favorite',
+                addToFavorite: 'Add to Favorites',
+                count: '',
+                idol: 'K-Pop/Idol',
+                ballad: 'Ballad',
+                hiphop: 'Hip-Hop',
+                rock: 'Rock/Indie',
+                worldtour: 'World Tour',
+                fanmeeting: 'Fan Meeting',
+                festival: 'Festival',
+                trot: 'Trot',
+                etc: 'Others'
+            },
+            ja: {
+                title: '公演統合情報',
+                subtitle: 'コンサート · ミュージカル · 演劇 · K-POP · 来韓公演',
+                lastUpdate: '最終更新',
+                search: '公演検索',
+                keyword: 'キーワード',
+                keywordPlaceholder: 'アーティスト、公演名を入力...',
+                startDate: '開始日',
+                endDate: '終了日',
+                searchBtn: '検索',
+                listView: '📋 リスト表示',
+                calendarView: '📅 カレンダー表示',
+                concert: '🎤 コンサート',
+                theater: '🎭 演劇 & ミュージカル',
+                all: '全体',
+                interpark: 'インターパーク',
+                melon: 'メロン',
+                seoul: 'ソウル',
+                gyeonggi: '京畿·仁川',
+                gangwon: '江原',
+                chungcheong: '忠清',
+                jeolla: '全羅',
+                gyeongsang: '慶尚',
+                jeju: '済州',
+                notification: '通知',
+                inactive: '無効',
+                active: '有効',
+                unsupportedDevice: '非対応',
+                favorites: 'お気に入り',
+                total: '全体',
+                venue: '会場',
+                period: '期間',
+                date: '日付',
+                ticketOpen: 'チケット発売',
+                noResults: '結果がありません',
+                tryOther: '他のキーワードや日付でお試しください。',
+                loading: '公演情報を読み込んでいます',
+                loadingKopis: 'KOPISデータ取得中...',
+                performanceList: '公演リスト',
+                sortByDday: 'D-day順',
+                ticketOpenCalendar: '🎫 チケット発売カレンダー',
+                concertCalendar: '🎤 公演日程カレンダー',
+                genre: 'ジャンル',
+                price: '価格',
+                cast: '出演',
+                status: '状態',
+                booking: '予約',
+                noTitle: 'タイトルなし',
+                addFavorite: 'お気に入り登録',
+                removeFavorite: 'お気に入り解除',
+                addToFavorite: 'お気に入りに追加',
+                count: '件',
+                idol: 'K-POP/アイドル',
+                ballad: 'バラード',
+                hiphop: 'ヒップホップ',
+                rock: 'ロック/インディー',
+                worldtour: '来韓公演',
+                fanmeeting: 'ファンミーティング',
+                festival: 'フェスティバル',
+                trot: 'トロット',
+                etc: 'その他'
+            },
+            zh: {
+                title: '演出综合信息',
+                subtitle: '演唱会 · 音乐剧 · 话剧 · K-POP · 巡回演出',
+                lastUpdate: '最后更新',
+                search: '搜索演出',
+                keyword: '关键词',
+                keywordPlaceholder: '输入艺人或演出名称...',
+                startDate: '开始日期',
+                endDate: '结束日期',
+                searchBtn: '搜索',
+                listView: '📋 列表视图',
+                calendarView: '📅 日历视图',
+                concert: '🎤 演唱会',
+                theater: '🎭 话剧 & 音乐剧',
+                all: '全部',
+                interpark: 'Interpark',
+                melon: 'Melon',
+                seoul: '首尔',
+                gyeonggi: '京畿·仁川',
+                gangwon: '江原',
+                chungcheong: '忠清',
+                jeolla: '全罗',
+                gyeongsang: '庆尚',
+                jeju: '济州',
+                notification: '通知',
+                inactive: '未启用',
+                active: '已启用',
+                unsupportedDevice: '不支持',
+                favorites: '收藏',
+                total: '总计',
+                venue: '场馆',
+                period: '时间',
+                date: '日期',
+                ticketOpen: '开票',
+                noResults: '没有结果',
+                tryOther: '请尝试其他关键词或日期。',
+                loading: '正在加载演出信息',
+                loadingKopis: '正在获取KOPIS数据...',
+                performanceList: '演出列表',
+                sortByDday: '按D-day排序',
+                ticketOpenCalendar: '🎫 开票日历',
+                concertCalendar: '🎤 演出日历',
+                genre: '类型',
+                price: '价格',
+                cast: '演员',
+                status: '状态',
+                booking: '预订',
+                noTitle: '无标题',
+                addFavorite: '收藏',
+                removeFavorite: '取消收藏',
+                addToFavorite: '添加收藏',
+                count: '个',
+                idol: 'K-POP/偶像',
+                ballad: '抒情',
+                hiphop: '嘻哈',
+                rock: '摇滚/独立',
+                worldtour: '巡演',
+                fanmeeting: '粉丝见面会',
+                festival: '音乐节',
+                trot: '演歌',
+                etc: '其他'
+            },
+            es: {
+                title: 'Info de Espectáculos',
+                subtitle: 'Concierto · Musical · Teatro · K-POP · Gira Mundial',
+                lastUpdate: 'Última actualización',
+                search: 'Buscar',
+                keyword: 'Palabra clave',
+                keywordPlaceholder: 'Ingrese artista o nombre del show...',
+                startDate: 'Fecha inicio',
+                endDate: 'Fecha fin',
+                searchBtn: 'Buscar',
+                listView: '📋 Vista Lista',
+                calendarView: '📅 Vista Calendario',
+                concert: '🎤 Concierto',
+                theater: '🎭 Teatro & Musical',
+                all: 'Todo',
+                interpark: 'Interpark',
+                melon: 'Melon',
+                seoul: 'Seúl',
+                gyeonggi: 'Gyeonggi',
+                gangwon: 'Gangwon',
+                chungcheong: 'Chungcheong',
+                jeolla: 'Jeolla',
+                gyeongsang: 'Gyeongsang',
+                jeju: 'Jeju',
+                notification: 'Notificación',
+                inactive: 'Inactivo',
+                active: 'Activo',
+                unsupportedDevice: 'No soportado',
+                favorites: 'Favoritos',
+                total: 'Total',
+                venue: 'Lugar',
+                period: 'Período',
+                date: 'Fecha',
+                ticketOpen: 'Venta de boletos',
+                noResults: 'Sin resultados',
+                tryOther: 'Intente con otras palabras o fechas.',
+                loading: 'Cargando información',
+                loadingKopis: 'Obteniendo datos de KOPIS...',
+                performanceList: 'Lista de Espectáculos',
+                sortByDday: 'Ordenado por D-day',
+                ticketOpenCalendar: '🎫 Calendario de Ventas',
+                concertCalendar: '🎤 Calendario de Conciertos',
+                genre: 'Género',
+                price: 'Precio',
+                cast: 'Elenco',
+                status: 'Estado',
+                booking: 'Reservar',
+                noTitle: 'Sin Título',
+                addFavorite: 'Agregar Favorito',
+                removeFavorite: 'Quitar Favorito',
+                addToFavorite: 'Agregar a Favoritos',
+                count: '',
+                idol: 'K-Pop/Idol',
+                ballad: 'Balada',
+                hiphop: 'Hip-Hop',
+                rock: 'Rock/Indie',
+                worldtour: 'Gira Mundial',
+                fanmeeting: 'Fan Meeting',
+                festival: 'Festival',
+                trot: 'Trot',
+                etc: 'Otros'
+            }
+        };
+
+        let currentLang = localStorage.getItem('ticket_lang') || 'ko';
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('ticket_lang', lang);
+            applyLanguage();
+        }
+
+        function applyLanguage() {
+            const texts = i18n[currentLang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (texts[key]) {
+                    el.textContent = texts[key];
+                }
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (texts[key]) {
+                    el.placeholder = texts[key];
+                }
+            });
+            document.getElementById('langSelect').value = currentLang;
+            document.title = texts.title;
+            // 현재 표시된 결과가 있으면 다시 렌더링
+            if (allData && allData.length > 0) {
+                renderResults();
+            }
+        }
+
+        function t(key) {
+            return i18n[currentLang][key] || i18n['ko'][key] || key;
+        }
+
         // 현재 날짜 설정
         const today = new Date();
         const sixtyDaysLater = new Date(today.getTime() + 60 * 24 * 60 * 60 * 1000);
@@ -1706,7 +2088,7 @@
             resultsDiv.innerHTML = `
                 <div class="loading-container">
                     <div class="loading-spinner-lg"></div>
-                    <h3>공연 정보를 불러오고 있습니다</h3>
+                    <h3>${t('loading')}</h3>
                     <div class="loading-steps">
                         <div class="loading-step-item active" id="stepKopis">⏳ KOPIS 공연 데이터 조회 중...</div>
                         <div class="loading-step-item" id="stepInterpark">⏳ 인터파크 티켓 조회 대기</div>
@@ -1739,7 +2121,7 @@
                         if (item.hash) allDataMap[item.hash] = item;
                     });
                     updateStats(fastResult.stats);
-                    document.getElementById('updateInfo').textContent = `마지막 업데이트: ${fastResult.timestamp}`;
+                    document.getElementById('updateInfo').textContent = `${t('lastUpdate')}: ${fastResult.timestamp}`;
                     renderResults();
                     if (currentView === 'calendar' && calendar) {
                         updateCalendarEvents();
@@ -1901,11 +2283,13 @@
             }
 
             if (filteredData.length > 0) {
+                const countText = currentLang === 'ko' || currentLang === 'ja' || currentLang === 'zh' ?
+                    `(${filteredData.length}${t('count')})` : `(${filteredData.length})`;
                 html += `
                     <div class="source-section">
                         <h3>
                             <span class="source-icon" style="background: #7c3aed30; color: #7c3aed">🎫</span>
-                            공연 목록 (${filteredData.length}건) - D-day 순 정렬
+                            ${t('performanceList')} ${countText} - ${t('sortByDday')}
                         </h3>
                         <div class="results-grid">
                 `;
@@ -1930,14 +2314,14 @@
                                 ${posterUrl ? `<img src="${posterUrl}" alt="${item.name}" loading="lazy" onerror="this.onerror=null; this.style.display='none'; this.parentElement.classList.add('no-poster');">` : ''}
                                 ${ddayBadge}
                                 ${categoryBadge}
-                                <button class="fav-btn ${isFav ? 'active' : ''}" data-hash="${item.hash}" onclick="event.stopPropagation(); toggleFavorite('${item.hash}', this);" title="관심 등록">${isFav ? '♥' : '♡'}</button>
+                                <button class="fav-btn ${isFav ? 'active' : ''}" data-hash="${item.hash}" onclick="event.stopPropagation(); toggleFavorite('${item.hash}', this);" title="${t('addFavorite')}">${isFav ? '♥' : '♡'}</button>
                             </div>
                             <div class="card-body">
-                                <div class="card-title">${item.name || '제목 없음'}</div>
-                                ${item.venue ? `<div class="card-info"><span>장소</span> ${item.venue}</div>` : ''}
-                                ${item.start_date ? `<div class="card-info"><span>기간</span> ${item.start_date} ~ ${item.end_date || ''}</div>` : ''}
-                                ${item.date ? `<div class="card-info"><span>날짜</span> ${item.date}</div>` : ''}
-                                ${item.ticket_open ? `<div class="card-info"><span>티켓오픈</span> ${item.ticket_open}</div>` : ''}
+                                <div class="card-title">${item.name || t('noTitle')}</div>
+                                ${item.venue ? `<div class="card-info"><span>${t('venue')}</span> ${item.venue}</div>` : ''}
+                                ${item.start_date ? `<div class="card-info"><span>${t('period')}</span> ${item.start_date} ~ ${item.end_date || ''}</div>` : ''}
+                                ${item.date ? `<div class="card-info"><span>${t('date')}</span> ${item.date}</div>` : ''}
+                                ${item.ticket_open ? `<div class="card-info"><span>${t('ticketOpen')}</span> ${item.ticket_open}</div>` : ''}
                                 <div class="site-badges">${siteBadges}</div>
                                 ${item.region ? `<span class="region-badge" style="background: ${getRegionColor(item.region)}30; color: ${getRegionColor(item.region)}">${item.region}</span>` : ''}
                             </div>
@@ -1949,7 +2333,7 @@
             }
 
             if (!html) {
-                html = '<div class="empty-state"><h3>결과가 없습니다</h3><p>다른 검색어나 날짜로 시도해보세요.</p></div>';
+                html = `<div class="empty-state"><h3>${t('noResults')}</h3><p>${t('tryOther')}</p></div>`;
             }
 
             resultsDiv.innerHTML = html;
@@ -1971,7 +2355,7 @@
 
             // 기본 정보 설정 + 찜 버튼
             const isFav = isFavorite(item.hash);
-            document.getElementById('modalTitle').innerHTML = `${item.name || '공연명 없음'}<button class="modal-fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${item.hash}', this, true)">${isFav ? '♥ 찜 해제' : '♡ 찜하기'}</button>`;
+            document.getElementById('modalTitle').innerHTML = `${item.name || t('noTitle')}<button class="modal-fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${item.hash}', this, true)">${isFav ? '♥ ' + t('removeFavorite') : '♡ ' + t('addToFavorite')}</button>`;
             document.getElementById('modalVenue').textContent = item.venue || '-';
             document.getElementById('modalGenre').textContent = item.genre || '-';
             document.getElementById('modalState').textContent = item.state || '-';
@@ -2392,6 +2776,7 @@
 
         // 페이지 로드 시 자동 조회
         window.onload = function() {
+            applyLanguage();
             initNotification();
             loadAllData();
         };
