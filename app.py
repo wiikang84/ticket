@@ -14,14 +14,14 @@ import re
 import json
 import hashlib
 
-# Selenium for dynamic page crawling (로컬 전용, Render.com에서는 비활성화)
-# from selenium import webdriver
-# from selenium.webdriver.chrome.service import Service
-# from selenium.webdriver.chrome.options import Options
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
-# from webdriver_manager.chrome import ChromeDriverManager
+# Selenium for dynamic page crawling
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 import threading
 import time as time_module
 import subprocess
@@ -32,32 +32,35 @@ import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-# 크롬 드라이버 (Render.com에서는 비활성화)
-# _chrome_driver_path = None
-# def get_chrome_driver_path():
-#     """크롬 드라이버 경로 (캐시)"""
-#     global _chrome_driver_path
-#     if _chrome_driver_path is None:
-#         _chrome_driver_path = ChromeDriverManager().install()
-#     return _chrome_driver_path
-#
-# def get_chrome_driver():
-#     """헤드리스 크롬 브라우저 생성"""
-#     options = Options()
-#     options.add_argument('--headless')
-#     options.add_argument('--no-sandbox')
-#     options.add_argument('--disable-dev-shm-usage')
-#     options.add_argument('--disable-gpu')
-#     options.add_argument('--disable-software-rasterizer')
-#     options.add_argument('--disable-extensions')
-#     options.add_argument('--disable-infobars')
-#     options.add_argument('--remote-debugging-port=0')
-#     options.add_argument('--window-size=1920,1080')
-#     options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
-#     options.add_argument('--log-level=3')
-#     service = Service(get_chrome_driver_path())
-#     driver = webdriver.Chrome(service=service, options=options)
-#     return driver
+# 크롬 드라이버 경로 캐시
+_chrome_driver_path = None
+
+def get_chrome_driver_path():
+    """크롬 드라이버 경로 (캐시)"""
+    global _chrome_driver_path
+    if _chrome_driver_path is None:
+        _chrome_driver_path = ChromeDriverManager().install()
+    return _chrome_driver_path
+
+# Selenium 브라우저 생성 함수
+def get_chrome_driver():
+    """헤드리스 크롬 브라우저 생성"""
+    options = Options()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--disable-software-rasterizer')
+    options.add_argument('--disable-extensions')
+    options.add_argument('--disable-infobars')
+    options.add_argument('--remote-debugging-port=0')
+    options.add_argument('--window-size=1920,1080')
+    options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+    options.add_argument('--log-level=3')
+
+    service = Service(get_chrome_driver_path())
+    driver = webdriver.Chrome(service=service, options=options)
+    return driver
 
 app = Flask(__name__)
 CORS(app)
