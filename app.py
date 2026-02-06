@@ -1243,6 +1243,118 @@ def search_all():
     return jsonify({'success': True, 'data': results})
 
 
+# ============================================================
+# 번역 API (MyMemory)
+# ============================================================
+
+# 번역 캐시 (메모리)
+translation_cache = {}
+translation_cache_lock = threading.Lock()
+
+# 언어 코드 매핑 (MyMemory용)
+LANG_CODES = {
+    'ko': 'ko',
+    'en': 'en',
+    'ja': 'ja',
+    'zh': 'zh-CN',
+    'es': 'es'
+}
+
+def translate_text(text, from_lang='ko', to_lang='en'):
+    """MyMemory API로 텍스트 번역"""
+    if not text or from_lang == to_lang:
+        return text
+
+    # 캐시 키
+    cache_key = f"{text}|{from_lang}|{to_lang}"
+
+    with translation_cache_lock:
+        if cache_key in translation_cache:
+            return translation_cache[cache_key]
+
+    try:
+        # MyMemory API 호출
+        from_code = LANG_CODES.get(from_lang, from_lang)
+        to_code = LANG_CODES.get(to_lang, to_lang)
+
+        url = "https://api.mymemory.translated.net/get"
+        params = {
+            'q': text[:500],  # 최대 500자
+            'langpair': f"{from_code}|{to_code}"
+        }
+
+        response = requests.get(url, params=params, timeout=5)
+
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('responseStatus') == 200:
+                translated = data.get('responseData', {}).get('translatedText', text)
+
+                # 캐시에 저장
+                with translation_cache_lock:
+                    translation_cache[cache_key] = translated
+
+                return translated
+    except Exception as e:
+        print(f"[번역 오류] {e}")
+
+    return text
+
+
+@app.route('/api/translate')
+def translate_api():
+    """텍스트 번역 API"""
+    text = request.args.get('text', '')
+    to_lang = request.args.get('to', 'en')
+    from_lang = request.args.get('from', 'ko')
+
+    if not text:
+        return jsonify({'success': False, 'error': '텍스트가 필요합니다.'})
+
+    translated = translate_text(text, from_lang, to_lang)
+
+    return jsonify({
+        'success': True,
+        'original': text,
+        'translated': translated,
+        'from': from_lang,
+        'to': to_lang
+    })
+
+
+@app.route('/api/translate/batch', methods=['POST'])
+def translate_batch_api():
+    """여러 텍스트 일괄 번역 API"""
+    data = request.get_json()
+
+    if not data:
+        return jsonify({'success': False, 'error': 'JSON 데이터가 필요합니다.'})
+
+    texts = data.get('texts', [])
+    to_lang = data.get('to', 'en')
+    from_lang = data.get('from', 'ko')
+
+    if not texts:
+        return jsonify({'success': False, 'error': '번역할 텍스트가 없습니다.'})
+
+    results = []
+    for text in texts[:50]:  # 최대 50개
+        translated = translate_text(text, from_lang, to_lang)
+        results.append({
+            'original': text,
+            'translated': translated
+        })
+        # API 부하 방지 (0.1초 딜레이)
+        time_module.sleep(0.1)
+
+    return jsonify({
+        'success': True,
+        'results': results,
+        'from': from_lang,
+        'to': to_lang
+    })
+
+
 # gunicorn 호환: 모듈 로드 시 스케줄러 자동 시작
 _scheduler = None
 

@@ -1395,16 +1395,16 @@
 
             <!-- 콘서트 세부 장르 탭 (콘서트 파트에서만 표시) -->
             <div class="tabs" id="genreTabs">
-                <button class="tab-btn active" onclick="showTab('all', this)">🔥 전체</button>
-                <button class="tab-btn" onclick="showTab('아이돌', this)">💜 아이돌/K-POP</button>
-                <button class="tab-btn" onclick="showTab('발라드', this)">🎤 발라드</button>
-                <button class="tab-btn" onclick="showTab('트로트', this)">📺 트로트</button>
-                <button class="tab-btn" onclick="showTab('랩/힙합', this)">🎧 랩/힙합</button>
-                <button class="tab-btn" onclick="showTab('락/인디', this)">🎸 락/인디</button>
-                <button class="tab-btn" onclick="showTab('내한공연', this)">🌍 내한공연</button>
-                <button class="tab-btn" onclick="showTab('팬미팅', this)">👥 팬미팅</button>
-                <button class="tab-btn" onclick="showTab('페스티벌', this)">🎪 페스티벌</button>
-                <button class="tab-btn" onclick="showTab('기타', this)">📌 기타</button>
+                <button class="tab-btn active" onclick="showTab('all', this)">🔥 <span data-i18n="genreAll">전체</span></button>
+                <button class="tab-btn" onclick="showTab('아이돌', this)">💜 <span data-i18n="genreIdol">아이돌/K-POP</span></button>
+                <button class="tab-btn" onclick="showTab('발라드', this)">🎤 <span data-i18n="genreBallad">발라드</span></button>
+                <button class="tab-btn" onclick="showTab('트로트', this)">📺 <span data-i18n="genreTrot">트로트</span></button>
+                <button class="tab-btn" onclick="showTab('랩/힙합', this)">🎧 <span data-i18n="genreHiphop">랩/힙합</span></button>
+                <button class="tab-btn" onclick="showTab('락/인디', this)">🎸 <span data-i18n="genreRock">락/인디</span></button>
+                <button class="tab-btn" onclick="showTab('내한공연', this)">🌍 <span data-i18n="genreWorldtour">내한공연</span></button>
+                <button class="tab-btn" onclick="showTab('팬미팅', this)">👥 <span data-i18n="genreFanmeeting">팬미팅</span></button>
+                <button class="tab-btn" onclick="showTab('페스티벌', this)">🎪 <span data-i18n="genreFestival">페스티벌</span></button>
+                <button class="tab-btn" onclick="showTab('기타', this)">📌 <span data-i18n="genreEtc">기타</span></button>
             </div>
 
         <div class="stats-bar" id="statsBar">
@@ -1574,7 +1574,17 @@
                 fanmeeting: '팬미팅',
                 festival: '페스티벌',
                 trot: '트로트',
-                etc: '기타'
+                etc: '기타',
+                genreAll: '전체',
+                genreIdol: '아이돌/K-POP',
+                genreBallad: '발라드',
+                genreTrot: '트로트',
+                genreHiphop: '랩/힙합',
+                genreRock: '락/인디',
+                genreWorldtour: '내한공연',
+                genreFanmeeting: '팬미팅',
+                genreFestival: '페스티벌',
+                genreEtc: '기타'
             },
             en: {
                 title: 'Performance Info',
@@ -1636,7 +1646,17 @@
                 fanmeeting: 'Fan Meeting',
                 festival: 'Festival',
                 trot: 'Trot',
-                etc: 'Others'
+                etc: 'Others',
+                genreAll: 'All',
+                genreIdol: 'K-Pop/Idol',
+                genreBallad: 'Ballad',
+                genreTrot: 'Trot',
+                genreHiphop: 'Hip-Hop',
+                genreRock: 'Rock/Indie',
+                genreWorldtour: 'World Tour',
+                genreFanmeeting: 'Fan Meeting',
+                genreFestival: 'Festival',
+                genreEtc: 'Others'
             },
             ja: {
                 title: '公演統合情報',
@@ -1698,7 +1718,17 @@
                 fanmeeting: 'ファンミーティング',
                 festival: 'フェスティバル',
                 trot: 'トロット',
-                etc: 'その他'
+                etc: 'その他',
+                genreAll: '全体',
+                genreIdol: 'K-POP/アイドル',
+                genreBallad: 'バラード',
+                genreTrot: 'トロット',
+                genreHiphop: 'ヒップホップ',
+                genreRock: 'ロック/インディー',
+                genreWorldtour: '来韓公演',
+                genreFanmeeting: 'ファンミ',
+                genreFestival: 'フェス',
+                genreEtc: 'その他'
             },
             zh: {
                 title: '演出综合信息',
@@ -1760,7 +1790,17 @@
                 fanmeeting: '粉丝见面会',
                 festival: '音乐节',
                 trot: '演歌',
-                etc: '其他'
+                etc: '其他',
+                genreAll: '全部',
+                genreIdol: 'K-POP/偶像',
+                genreBallad: '抒情',
+                genreTrot: '演歌',
+                genreHiphop: '嘻哈',
+                genreRock: '摇滚/独立',
+                genreWorldtour: '巡演',
+                genreFanmeeting: '粉丝见面会',
+                genreFestival: '音乐节',
+                genreEtc: '其他'
             },
             es: {
                 title: 'Info de Espectáculos',
@@ -1822,16 +1862,114 @@
                 fanmeeting: 'Fan Meeting',
                 festival: 'Festival',
                 trot: 'Trot',
-                etc: 'Otros'
+                etc: 'Otros',
+                genreAll: 'Todo',
+                genreIdol: 'K-Pop/Idol',
+                genreBallad: 'Balada',
+                genreTrot: 'Trot',
+                genreHiphop: 'Hip-Hop',
+                genreRock: 'Rock/Indie',
+                genreWorldtour: 'Gira Mundial',
+                genreFanmeeting: 'Fan Meeting',
+                genreFestival: 'Festival',
+                genreEtc: 'Otros'
             }
         };
 
         let currentLang = localStorage.getItem('ticket_lang') || 'ko';
 
+        // 번역 캐시 (LocalStorage)
+        const translationCache = JSON.parse(localStorage.getItem('ticket_translations') || '{}');
+        let isTranslating = false;
+
+        function saveTranslationCache() {
+            // 캐시 크기 제한 (최대 500개)
+            const keys = Object.keys(translationCache);
+            if (keys.length > 500) {
+                keys.slice(0, keys.length - 500).forEach(k => delete translationCache[k]);
+            }
+            localStorage.setItem('ticket_translations', JSON.stringify(translationCache));
+        }
+
+        async function translateText(text, toLang) {
+            if (!text || toLang === 'ko') return text;
+
+            const cacheKey = `${text}|${toLang}`;
+            if (translationCache[cacheKey]) {
+                return translationCache[cacheKey];
+            }
+
+            try {
+                const response = await fetch(`/api/translate?text=${encodeURIComponent(text)}&to=${toLang}&from=ko`);
+                const data = await response.json();
+                if (data.success) {
+                    translationCache[cacheKey] = data.translated;
+                    return data.translated;
+                }
+            } catch (e) {
+                console.error('번역 오류:', e);
+            }
+            return text;
+        }
+
+        async function translateDataForDisplay() {
+            if (currentLang === 'ko' || !allData || allData.length === 0) {
+                renderResults();
+                return;
+            }
+
+            isTranslating = true;
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="loading-container"><div class="loading-spinner-lg"></div><h3>🌐 ${currentLang === 'en' ? 'Translating...' : currentLang === 'ja' ? '翻訳中...' : currentLang === 'zh' ? '翻译中...' : 'Traduciendo...'}</h3></div>`;
+
+            // 현재 필터된 데이터만 번역 (최대 30개)
+            let filteredData = allData.filter(item => (item.part || 'concert') === currentPart);
+            if (currentSource !== 'all') {
+                filteredData = filteredData.filter(item => {
+                    if (item.available_sites) return item.available_sites.some(site => site.name === currentSource);
+                    return item.source === currentSource;
+                });
+            }
+            if (currentRegion !== 'all') {
+                filteredData = filteredData.filter(item => item.region === currentRegion);
+            }
+
+            const toTranslate = filteredData.slice(0, 30);
+
+            for (const item of toTranslate) {
+                const hash = item.hash;
+                if (!hash) continue;
+
+                // 이미 번역된 경우 스킵
+                const cacheKey = `${item.name}|${currentLang}`;
+                if (translationCache[cacheKey]) {
+                    item._translated_name = translationCache[cacheKey];
+                } else if (item.name) {
+                    item._translated_name = await translateText(item.name, currentLang);
+                }
+
+                const venueCacheKey = `${item.venue}|${currentLang}`;
+                if (translationCache[venueCacheKey]) {
+                    item._translated_venue = translationCache[venueCacheKey];
+                } else if (item.venue) {
+                    item._translated_venue = await translateText(item.venue, currentLang);
+                }
+            }
+
+            saveTranslationCache();
+            isTranslating = false;
+            renderResults();
+        }
+
         function changeLanguage(lang) {
             currentLang = lang;
             localStorage.setItem('ticket_lang', lang);
             applyLanguage();
+
+            // 한국어가 아니면 데이터 번역
+            if (lang !== 'ko' && allData && allData.length > 0) {
+                translateDataForDisplay();
+            }
         }
 
         function applyLanguage() {
@@ -1850,14 +1988,21 @@
             });
             document.getElementById('langSelect').value = currentLang;
             document.title = texts.title;
-            // 현재 표시된 결과가 있으면 다시 렌더링
-            if (allData && allData.length > 0) {
+            // 현재 표시된 결과가 있으면 다시 렌더링 (한국어일때만)
+            if (currentLang === 'ko' && allData && allData.length > 0) {
                 renderResults();
             }
         }
 
         function t(key) {
             return i18n[currentLang][key] || i18n['ko'][key] || key;
+        }
+
+        // 번역된 텍스트 반환 (없으면 원본)
+        function getTranslatedText(item, field) {
+            if (currentLang === 'ko') return item[field] || '';
+            const translatedField = `_translated_${field}`;
+            return item[translatedField] || item[field] || '';
         }
 
         // 현재 날짜 설정
@@ -2308,17 +2453,20 @@
 
                     const isFav = isFavorite(item.hash);
 
+                    const displayName = getTranslatedText(item, 'name') || t('noTitle');
+                    const displayVenue = getTranslatedText(item, 'venue');
+
                     html += `
                         <div class="card" data-hash="${item.hash}">
                             <div class="card-img">
-                                ${posterUrl ? `<img src="${posterUrl}" alt="${item.name}" loading="lazy" onerror="this.onerror=null; this.style.display='none'; this.parentElement.classList.add('no-poster');">` : ''}
+                                ${posterUrl ? `<img src="${posterUrl}" alt="${displayName}" loading="lazy" onerror="this.onerror=null; this.style.display='none'; this.parentElement.classList.add('no-poster');">` : ''}
                                 ${ddayBadge}
                                 ${categoryBadge}
                                 <button class="fav-btn ${isFav ? 'active' : ''}" data-hash="${item.hash}" onclick="event.stopPropagation(); toggleFavorite('${item.hash}', this);" title="${t('addFavorite')}">${isFav ? '♥' : '♡'}</button>
                             </div>
                             <div class="card-body">
-                                <div class="card-title">${item.name || t('noTitle')}</div>
-                                ${item.venue ? `<div class="card-info"><span>${t('venue')}</span> ${item.venue}</div>` : ''}
+                                <div class="card-title">${displayName}</div>
+                                ${displayVenue ? `<div class="card-info"><span>${t('venue')}</span> ${displayVenue}</div>` : ''}
                                 ${item.start_date ? `<div class="card-info"><span>${t('period')}</span> ${item.start_date} ~ ${item.end_date || ''}</div>` : ''}
                                 ${item.date ? `<div class="card-info"><span>${t('date')}</span> ${item.date}</div>` : ''}
                                 ${item.ticket_open ? `<div class="card-info"><span>${t('ticketOpen')}</span> ${item.ticket_open}</div>` : ''}
@@ -2353,10 +2501,14 @@
         async function showDetail(item) {
             const modal = document.getElementById('modalOverlay');
 
+            // 번역된 텍스트 사용
+            const displayName = getTranslatedText(item, 'name') || t('noTitle');
+            const displayVenue = getTranslatedText(item, 'venue') || '-';
+
             // 기본 정보 설정 + 찜 버튼
             const isFav = isFavorite(item.hash);
-            document.getElementById('modalTitle').innerHTML = `${item.name || t('noTitle')}<button class="modal-fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${item.hash}', this, true)">${isFav ? '♥ ' + t('removeFavorite') : '♡ ' + t('addToFavorite')}</button>`;
-            document.getElementById('modalVenue').textContent = item.venue || '-';
+            document.getElementById('modalTitle').innerHTML = `${displayName}<button class="modal-fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${item.hash}', this, true)">${isFav ? '♥ ' + t('removeFavorite') : '♡ ' + t('addToFavorite')}</button>`;
+            document.getElementById('modalVenue').textContent = displayVenue;
             document.getElementById('modalGenre').textContent = item.genre || '-';
             document.getElementById('modalState').textContent = item.state || '-';
             document.getElementById('modalTicketOpen').textContent = item.ticket_open || '-';
@@ -2377,7 +2529,7 @@
                 if (modalPosterUrl.includes('yes24.com') || modalPosterUrl.includes('melon.com') || modalPosterUrl.includes('tkfile')) {
                     modalPosterUrl = '/api/proxy/image?url=' + encodeURIComponent(modalPosterUrl);
                 }
-                posterDiv.innerHTML = `<img src="${modalPosterUrl}" alt="${item.name}" onerror="this.parentElement.innerHTML='<span>No Image</span>'">`;
+                posterDiv.innerHTML = `<img src="${modalPosterUrl}" alt="${displayName}" onerror="this.parentElement.innerHTML='<span>No Image</span>'">`;
             } else {
                 posterDiv.innerHTML = '<span>No Image</span>';
             }
