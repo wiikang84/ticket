@@ -1,0 +1,218 @@
+# Korean UI translations
+# Copyright (C) 2026
+# This file is distributed under the same license as the ticket project.
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ko\n"
+
+msgid "title"
+msgstr "공연 통합 정보"
+
+msgid "subtitle"
+msgstr "콘서트 · 뮤지컬 · 연극 · K-POP · 내한공연"
+
+msgid "lastUpdate"
+msgstr "마지막 업데이트"
+
+msgid "search"
+msgstr "공연 검색"
+
+msgid "keyword"
+msgstr "검색어"
+
+msgid "keywordPlaceholder"
+msgstr "아티스트, 공연명 입력..."
+
+msgid "startDate"
+msgstr "시작일"
+
+msgid "endDate"
+msgstr "종료일"
+
+msgid "searchBtn"
+msgstr "검색"
+
+msgid "listView"
+msgstr "📋 목록 보기"
+
+msgid "calendarView"
+msgstr "📅 캘린더 보기"
+
+msgid "concert"
+msgstr "🎤 콘서트"
+
+msgid "theater"
+msgstr "🎭 연극 & 뮤지컬"
+
+msgid "all"
+msgstr "전체"
+
+msgid "interpark"
+msgstr "인터파크"
+
+msgid "melon"
+msgstr "멜론"
+
+msgid "seoul"
+msgstr "서울"
+
+msgid "gyeonggi"
+msgstr "경기·인천"
+
+msgid "gangwon"
+msgstr "강원"
+
+msgid "chungcheong"
+msgstr "충청"
+
+msgid "jeolla"
+msgstr "전라"
+
+msgid "gyeongsang"
+msgstr "경상"
+
+msgid "jeju"
+msgstr "제주"
+
+msgid "notification"
+msgstr "알림"
+
+msgid "inactive"
+msgstr "비활성"
+
+msgid "active"
+msgstr "활성"
+
+msgid "unsupportedDevice"
+msgstr "미지원 기기"
+
+msgid "favorites"
+msgstr "관심"
+
+msgid "total"
+msgstr "전체"
+
+msgid "venue"
+msgstr "장소"
+
+msgid "period"
+msgstr "기간"
+
+msgid "date"
+msgstr "날짜"
+
+msgid "ticketOpen"
+msgstr "티켓오픈"
+
+msgid "noResults"
+msgstr "결과가 없습니다"
+
+msgid "tryOther"
+msgstr "다른 검색어나 날짜로 시도해보세요."
+
+msgid "loading"
+msgstr "공연 정보를 불러오고 있습니다"
+
+msgid "loadingKopis"
+msgstr "KOPIS 공연 데이터 조회 중..."
+
+msgid "performanceList"
+msgstr "공연 목록"
+
+msgid "sortByDday"
+msgstr "D-day 순 정렬"
+
+msgid "ticketOpenCalendar"
+msgstr "🎫 예매오픈 캘린더"
+
+msgid "concertCalendar"
+msgstr "🎤 공연일정 캘린더"
+
+msgid "genre"
+msgstr "장르"
+
+msgid "price"
+msgstr "가격"
+
+msgid "cast"
+msgstr "출연"
+
+msgid "status"
+msgstr "상태"
+
+msgid "booking"
+msgstr "예매"
+
+msgid "noTitle"
+msgstr "제목 없음"
+
+msgid "addFavorite"
+msgstr "관심 등록"
+
+msgid "removeFavorite"
+msgstr "찜 해제"
+
+msgid "addToFavorite"
+msgstr "찜하기"
+
+msgid "count"
+msgstr "건"
+
+msgid "idol"
+msgstr "아이돌"
+
+msgid "ballad"
+msgstr "발라드"
+
+msgid "hiphop"
+msgstr "랩/힙합"
+
+msgid "rock"
+msgstr "락/인디"
+
+msgid "worldtour"
+msgstr "내한공연"
+
+msgid "fanmeeting"
+msgstr "팬미팅"
+
+msgid "festival"
+msgstr "페스티벌"
+
+msgid "trot"
+msgstr "트로트"
+
+msgid "etc"
+msgstr "기타"
+
+msgid "genreAll"
+msgstr "전체"
+
+msgid "genreIdol"
+msgstr "아이돌/K-POP"
+
+msgid "genreBallad"
+msgstr "발라드"
+
+msgid "genreTrot"
+msgstr "트로트"
+
+msgid "genreHiphop"
+msgstr "랩/힙합"
+
+msgid "genreRock"
+msgstr "락/인디"
+
+msgid "genreWorldtour"
+msgstr "내한공연"
+
+msgid "genreFanmeeting"
+msgstr "팬미팅"
+
+msgid "genreFestival"
+msgstr "페스티벌"
+
+msgid "genreEtc"
+msgstr "기타"

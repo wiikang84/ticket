@@ -1,0 +1,218 @@
+# Chinese (Simplified) UI translations
+# Copyright (C) 2026
+# This file is distributed under the same license as the ticket project.
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: zh\n"
+
+msgid "title"
+msgstr "演出综合信息"
+
+msgid "subtitle"
+msgstr "演唱会 · 音乐剧 · 话剧 · K-POP · 巡回演出"
+
+msgid "lastUpdate"
+msgstr "最后更新"
+
+msgid "search"
+msgstr "搜索演出"
+
+msgid "keyword"
+msgstr "关键词"
+
+msgid "keywordPlaceholder"
+msgstr "输入艺人或演出名称..."
+
+msgid "startDate"
+msgstr "开始日期"
+
+msgid "endDate"
+msgstr "结束日期"
+
+msgid "searchBtn"
+msgstr "搜索"
+
+msgid "listView"
+msgstr "📋 列表视图"
+
+msgid "calendarView"
+msgstr "📅 日历视图"
+
+msgid "concert"
+msgstr "🎤 演唱会"
+
+msgid "theater"
+msgstr "🎭 话剧 & 音乐剧"
+
+msgid "all"
+msgstr "全部"
+
+msgid "interpark"
+msgstr "Interpark"
+
+msgid "melon"
+msgstr "Melon"
+
+msgid "seoul"
+msgstr "首尔"
+
+msgid "gyeonggi"
+msgstr "京畿·仁川"
+
+msgid "gangwon"
+msgstr "江原"
+
+msgid "chungcheong"
+msgstr "忠清"
+
+msgid "jeolla"
+msgstr "全罗"
+
+msgid "gyeongsang"
+msgstr "庆尚"
+
+msgid "jeju"
+msgstr "济州"
+
+msgid "notification"
+msgstr "通知"
+
+msgid "inactive"
+msgstr "未启用"
+
+msgid "active"
+msgstr "已启用"
+
+msgid "unsupportedDevice"
+msgstr "不支持"
+
+msgid "favorites"
+msgstr "收藏"
+
+msgid "total"
+msgstr "总计"
+
+msgid "venue"
+msgstr "场馆"
+
+msgid "period"
+msgstr "时间"
+
+msgid "date"
+msgstr "日期"
+
+msgid "ticketOpen"
+msgstr "开票"
+
+msgid "noResults"
+msgstr "没有结果"
+
+msgid "tryOther"
+msgstr "请尝试其他关键词或日期。"
+
+msgid "loading"
+msgstr "正在加载演出信息"
+
+msgid "loadingKopis"
+msgstr "正在获取KOPIS数据..."
+
+msgid "performanceList"
+msgstr "演出列表"
+
+msgid "sortByDday"
+msgstr "按D-day排序"
+
+msgid "ticketOpenCalendar"
+msgstr "🎫 开票日历"
+
+msgid "concertCalendar"
+msgstr "🎤 演出日历"
+
+msgid "genre"
+msgstr "类型"
+
+msgid "price"
+msgstr "价格"
+
+msgid "cast"
+msgstr "演员"
+
+msgid "status"
+msgstr "状态"
+
+msgid "booking"
+msgstr "预订"
+
+msgid "noTitle"
+msgstr "无标题"
+
+msgid "addFavorite"
+msgstr "收藏"
+
+msgid "removeFavorite"
+msgstr "取消收藏"
+
+msgid "addToFavorite"
+msgstr "添加收藏"
+
+msgid "count"
+msgstr "个"
+
+msgid "idol"
+msgstr "K-POP/偶像"
+
+msgid "ballad"
+msgstr "抒情"
+
+msgid "hiphop"
+msgstr "嘻哈"
+
+msgid "rock"
+msgstr "摇滚/独立"
+
+msgid "worldtour"
+msgstr "巡演"
+
+msgid "fanmeeting"
+msgstr "粉丝见面会"
+
+msgid "festival"
+msgstr "音乐节"
+
+msgid "trot"
+msgstr "演歌"
+
+msgid "etc"
+msgstr "其他"
+
+msgid "genreAll"
+msgstr "全部"
+
+msgid "genreIdol"
+msgstr "K-POP/偶像"
+
+msgid "genreBallad"
+msgstr "抒情"
+
+msgid "genreTrot"
+msgstr "演歌"
+
+msgid "genreHiphop"
+msgstr "嘻哈"
+
+msgid "genreRock"
+msgstr "摇滚/独立"
+
+msgid "genreWorldtour"
+msgstr "巡演"
+
+msgid "genreFanmeeting"
+msgstr "粉丝见面会"
+
+msgid "genreFestival"
+msgstr "音乐节"
+
+msgid "genreEtc"
+msgstr "其他"

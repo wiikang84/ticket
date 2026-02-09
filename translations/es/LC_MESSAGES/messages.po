@@ -1,0 +1,218 @@
+# Spanish UI translations
+# Copyright (C) 2026
+# This file is distributed under the same license as the ticket project.
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: es\n"
+
+msgid "title"
+msgstr "Info de Espectáculos"
+
+msgid "subtitle"
+msgstr "Concierto · Musical · Teatro · K-POP · Gira Mundial"
+
+msgid "lastUpdate"
+msgstr "Última actualización"
+
+msgid "search"
+msgstr "Buscar"
+
+msgid "keyword"
+msgstr "Palabra clave"
+
+msgid "keywordPlaceholder"
+msgstr "Ingrese artista o nombre del show..."
+
+msgid "startDate"
+msgstr "Fecha inicio"
+
+msgid "endDate"
+msgstr "Fecha fin"
+
+msgid "searchBtn"
+msgstr "Buscar"
+
+msgid "listView"
+msgstr "📋 Vista Lista"
+
+msgid "calendarView"
+msgstr "📅 Vista Calendario"
+
+msgid "concert"
+msgstr "🎤 Concierto"
+
+msgid "theater"
+msgstr "🎭 Teatro & Musical"
+
+msgid "all"
+msgstr "Todo"
+
+msgid "interpark"
+msgstr "Interpark"
+
+msgid "melon"
+msgstr "Melon"
+
+msgid "seoul"
+msgstr "Seúl"
+
+msgid "gyeonggi"
+msgstr "Gyeonggi"
+
+msgid "gangwon"
+msgstr "Gangwon"
+
+msgid "chungcheong"
+msgstr "Chungcheong"
+
+msgid "jeolla"
+msgstr "Jeolla"
+
+msgid "gyeongsang"
+msgstr "Gyeongsang"
+
+msgid "jeju"
+msgstr "Jeju"
+
+msgid "notification"
+msgstr "Notificación"
+
+msgid "inactive"
+msgstr "Inactivo"
+
+msgid "active"
+msgstr "Activo"
+
+msgid "unsupportedDevice"
+msgstr "No soportado"
+
+msgid "favorites"
+msgstr "Favoritos"
+
+msgid "total"
+msgstr "Total"
+
+msgid "venue"
+msgstr "Lugar"
+
+msgid "period"
+msgstr "Período"
+
+msgid "date"
+msgstr "Fecha"
+
+msgid "ticketOpen"
+msgstr "Venta de boletos"
+
+msgid "noResults"
+msgstr "Sin resultados"
+
+msgid "tryOther"
+msgstr "Intente con otras palabras o fechas."
+
+msgid "loading"
+msgstr "Cargando información"
+
+msgid "loadingKopis"
+msgstr "Obteniendo datos de KOPIS..."
+
+msgid "performanceList"
+msgstr "Lista de Espectáculos"
+
+msgid "sortByDday"
+msgstr "Ordenado por D-day"
+
+msgid "ticketOpenCalendar"
+msgstr "🎫 Calendario de Ventas"
+
+msgid "concertCalendar"
+msgstr "🎤 Calendario de Conciertos"
+
+msgid "genre"
+msgstr "Género"
+
+msgid "price"
+msgstr "Precio"
+
+msgid "cast"
+msgstr "Elenco"
+
+msgid "status"
+msgstr "Estado"
+
+msgid "booking"
+msgstr "Reservar"
+
+msgid "noTitle"
+msgstr "Sin Título"
+
+msgid "addFavorite"
+msgstr "Agregar Favorito"
+
+msgid "removeFavorite"
+msgstr "Quitar Favorito"
+
+msgid "addToFavorite"
+msgstr "Agregar a Favoritos"
+
+msgid "count"
+msgstr ""
+
+msgid "idol"
+msgstr "K-Pop/Idol"
+
+msgid "ballad"
+msgstr "Balada"
+
+msgid "hiphop"
+msgstr "Hip-Hop"
+
+msgid "rock"
+msgstr "Rock/Indie"
+
+msgid "worldtour"
+msgstr "Gira Mundial"
+
+msgid "fanmeeting"
+msgstr "Fan Meeting"
+
+msgid "festival"
+msgstr "Festival"
+
+msgid "trot"
+msgstr "Trot"
+
+msgid "etc"
+msgstr "Otros"
+
+msgid "genreAll"
+msgstr "Todo"
+
+msgid "genreIdol"
+msgstr "K-Pop/Idol"
+
+msgid "genreBallad"
+msgstr "Balada"
+
+msgid "genreTrot"
+msgstr "Trot"
+
+msgid "genreHiphop"
+msgstr "Hip-Hop"
+
+msgid "genreRock"
+msgstr "Rock/Indie"
+
+msgid "genreWorldtour"
+msgstr "Gira Mundial"
+
+msgid "genreFanmeeting"
+msgstr "Fan Meeting"
+
+msgid "genreFestival"
+msgstr "Festival"
+
+msgid "genreEtc"
+msgstr "Otros"

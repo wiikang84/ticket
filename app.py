@@ -27,6 +27,7 @@ import time as time_module
 import subprocess
 import os
 import logging
+import polib
 
 # APScheduler (12시간 자동 업데이트)
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -728,6 +729,13 @@ def scheduled_update():
 
         filtered_list.sort(key=sort_key)
 
+        # 공연 데이터 사전 번역
+        try:
+            translate_performance_data(filtered_list)
+            scheduler_logger.info(f"공연 데이터 번역 완료: {len(filtered_list)}건")
+        except Exception as e:
+            scheduler_logger.warning(f"공연 데이터 번역 실패: {e}")
+
         # 캐시에 저장
         with cache_lock:
             cache['data'] = {
@@ -1002,6 +1010,12 @@ def get_all_data():
 
         performances_list.sort(key=sort_key)
 
+        # 공연 데이터 사전 번역
+        try:
+            translate_performance_data(performances_list)
+        except Exception as e:
+            print(f"[번역] 공연 데이터 번역 실패: {e}")
+
         return jsonify({
             'success': True,
             'data': performances_list,
@@ -1244,11 +1258,69 @@ def search_all():
 
 
 # ============================================================
-# 번역 API (MyMemory)
+# PO 파일 기반 UI 번역
 # ============================================================
 
-# 번역 캐시 (메모리)
-translation_cache = {}
+SUPPORTED_LANGS = ['ko', 'en', 'ja', 'zh', 'es']
+TRANSLATIONS_DIR = os.path.join(os.path.dirname(__file__), 'translations')
+
+_ui_translations = {}
+
+def load_ui_translations():
+    """PO 파일에서 UI 번역을 메모리에 로드"""
+    global _ui_translations
+    _ui_translations = {}
+    for lang in SUPPORTED_LANGS:
+        po_path = os.path.join(TRANSLATIONS_DIR, lang, 'LC_MESSAGES', 'messages.po')
+        try:
+            po = polib.pofile(po_path)
+            _ui_translations[lang] = {entry.msgid: entry.msgstr for entry in po if entry.msgid}
+        except Exception as e:
+            print(f"[i18n] PO 파일 로드 실패 ({lang}): {e}")
+            _ui_translations[lang] = {}
+
+load_ui_translations()
+
+
+@app.route('/api/i18n/<lang>')
+def get_ui_translations(lang):
+    """UI 번역을 JSON으로 반환"""
+    if lang not in SUPPORTED_LANGS:
+        lang = 'ko'
+    translations = _ui_translations.get(lang, _ui_translations.get('ko', {}))
+    response = jsonify(translations)
+    response.headers['Cache-Control'] = 'public, max-age=3600'
+    return response
+
+
+# ============================================================
+# 번역 API (MyMemory) - 서버 사이드 전용
+# ============================================================
+
+# 영속 번역 캐시
+TRANSLATION_CACHE_FILE = os.path.join(os.path.dirname(__file__), 'translation_cache.json')
+
+def load_translation_cache():
+    """JSON 파일에서 번역 캐시 로드"""
+    try:
+        if os.path.exists(TRANSLATION_CACHE_FILE):
+            with open(TRANSLATION_CACHE_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"[번역 캐시] 로드 실패: {e}")
+    return {}
+
+def save_translation_cache():
+    """번역 캐시를 JSON 파일에 저장"""
+    try:
+        with translation_cache_lock:
+            data = dict(translation_cache)
+        with open(TRANSLATION_CACHE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"[번역 캐시] 저장 실패: {e}")
+
+translation_cache = load_translation_cache()
 translation_cache_lock = threading.Lock()
 
 # 언어 코드 매핑 (MyMemory용)
@@ -1303,7 +1375,7 @@ def translate_text(text, from_lang='ko', to_lang='en'):
 
 @app.route('/api/translate')
 def translate_api():
-    """텍스트 번역 API"""
+    """텍스트 번역 API (deprecated: 프론트엔드에서 더 이상 사용하지 않음. 디버깅용으로 유지)"""
     text = request.args.get('text', '')
     to_lang = request.args.get('to', 'en')
     from_lang = request.args.get('from', 'ko')
@@ -1324,7 +1396,7 @@ def translate_api():
 
 @app.route('/api/translate/batch', methods=['POST'])
 def translate_batch_api():
-    """여러 텍스트 일괄 번역 API"""
+    """여러 텍스트 일괄 번역 API (deprecated: 프론트엔드에서 더 이상 사용하지 않음. 디버깅용으로 유지)"""
     data = request.get_json()
 
     if not data:
@@ -1353,6 +1425,55 @@ def translate_batch_api():
         'from': from_lang,
         'to': to_lang
     })
+
+
+# ============================================================
+# 스크래핑 시 공연 데이터 사전 번역
+# ============================================================
+
+def translate_performance_data(performances):
+    """스크래핑 시 공연 name/venue를 4개 언어로 사전 번역"""
+    global translation_cache
+    target_langs = [l for l in SUPPORTED_LANGS if l != 'ko']
+
+    # 번역이 필요한 텍스트 수집 (중복 제거)
+    texts_to_translate = []
+    for perf in performances:
+        for field in ['name', 'venue']:
+            text = perf.get(field, '')
+            if not text:
+                continue
+            for lang in target_langs:
+                cache_key = f"{text}|{lang}"
+                if cache_key not in translation_cache:
+                    texts_to_translate.append((text, lang, cache_key))
+
+    # 중복 제거
+    seen = set()
+    unique_texts = []
+    for text, lang, cache_key in texts_to_translate:
+        if cache_key not in seen:
+            seen.add(cache_key)
+            unique_texts.append((text, lang, cache_key))
+
+    # MyMemory API로 번역 (rate limiting 적용)
+    for text, lang, cache_key in unique_texts:
+        translated = translate_text(text, 'ko', lang)
+        with translation_cache_lock:
+            translation_cache[cache_key] = translated
+        time_module.sleep(0.1)
+
+    # 번역 결과를 공연 데이터에 flat key로 추가
+    for perf in performances:
+        for field in ['name', 'venue']:
+            text = perf.get(field, '')
+            for lang in target_langs:
+                cache_key = f"{text}|{lang}"
+                with translation_cache_lock:
+                    perf[f"{field}_{lang}"] = translation_cache.get(cache_key, text)
+
+    # 캐시 파일에 저장
+    save_translation_cache()
 
 
 # gunicorn 호환: 모듈 로드 시 스케줄러 자동 시작

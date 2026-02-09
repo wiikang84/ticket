@@ -1468,31 +1468,31 @@
                 <div class="modal-dday dday-normal" id="modalDday">D-day</div>
                 <div class="modal-info">
                     <div class="modal-info-item">
-                        <span class="modal-info-label">공연일</span>
+                        <span class="modal-info-label" data-i18n="date">공연일</span>
                         <span class="modal-info-value" id="modalDate">-</span>
                     </div>
                     <div class="modal-info-item">
-                        <span class="modal-info-label">장소</span>
+                        <span class="modal-info-label" data-i18n="venue">장소</span>
                         <span class="modal-info-value" id="modalVenue">-</span>
                     </div>
                     <div class="modal-info-item">
-                        <span class="modal-info-label">장르</span>
+                        <span class="modal-info-label" data-i18n="genre">장르</span>
                         <span class="modal-info-value" id="modalGenre">-</span>
                     </div>
                     <div class="modal-info-item">
-                        <span class="modal-info-label">티켓오픈</span>
+                        <span class="modal-info-label" data-i18n="ticketOpen">티켓오픈</span>
                         <span class="modal-info-value" id="modalTicketOpen">-</span>
                     </div>
                     <div class="modal-info-item">
-                        <span class="modal-info-label">가격</span>
+                        <span class="modal-info-label" data-i18n="price">가격</span>
                         <span class="modal-info-value" id="modalPrice">-</span>
                     </div>
                     <div class="modal-info-item">
-                        <span class="modal-info-label">출연</span>
+                        <span class="modal-info-label" data-i18n="cast">출연</span>
                         <span class="modal-info-value" id="modalCast">-</span>
                     </div>
                     <div class="modal-info-item">
-                        <span class="modal-info-label">상태</span>
+                        <span class="modal-info-label" data-i18n="status">상태</span>
                         <span class="modal-info-value" id="modalState">-</span>
                     </div>
                 </div>
@@ -1513,467 +1513,43 @@
         // =============================================
         // 다국어 지원 (i18n)
         // =============================================
-        const i18n = {
-            ko: {
-                title: '공연 통합 정보',
-                subtitle: '콘서트 · 뮤지컬 · 연극 · K-POP · 내한공연',
-                lastUpdate: '마지막 업데이트',
-                search: '공연 검색',
-                keyword: '검색어',
-                keywordPlaceholder: '아티스트, 공연명 입력...',
-                startDate: '시작일',
-                endDate: '종료일',
-                searchBtn: '검색',
-                listView: '📋 목록 보기',
-                calendarView: '📅 캘린더 보기',
-                concert: '🎤 콘서트',
-                theater: '🎭 연극 & 뮤지컬',
-                all: '전체',
-                interpark: '인터파크',
-                melon: '멜론',
-                seoul: '서울',
-                gyeonggi: '경기·인천',
-                gangwon: '강원',
-                chungcheong: '충청',
-                jeolla: '전라',
-                gyeongsang: '경상',
-                jeju: '제주',
-                notification: '알림',
-                inactive: '비활성',
-                active: '활성',
-                unsupportedDevice: '미지원 기기',
-                favorites: '관심',
-                total: '전체',
-                venue: '장소',
-                period: '기간',
-                date: '날짜',
-                ticketOpen: '티켓오픈',
-                noResults: '결과가 없습니다',
-                tryOther: '다른 검색어나 날짜로 시도해보세요.',
-                loading: '공연 정보를 불러오고 있습니다',
-                loadingKopis: 'KOPIS 공연 데이터 조회 중...',
-                performanceList: '공연 목록',
-                sortByDday: 'D-day 순 정렬',
-                ticketOpenCalendar: '🎫 예매오픈 캘린더',
-                concertCalendar: '🎤 공연일정 캘린더',
-                genre: '장르',
-                price: '가격',
-                cast: '출연',
-                status: '상태',
-                booking: '예매',
-                noTitle: '제목 없음',
-                addFavorite: '관심 등록',
-                removeFavorite: '찜 해제',
-                addToFavorite: '찜하기',
-                count: '건',
-                idol: '아이돌',
-                ballad: '발라드',
-                hiphop: '랩/힙합',
-                rock: '락/인디',
-                worldtour: '내한공연',
-                fanmeeting: '팬미팅',
-                festival: '페스티벌',
-                trot: '트로트',
-                etc: '기타',
-                genreAll: '전체',
-                genreIdol: '아이돌/K-POP',
-                genreBallad: '발라드',
-                genreTrot: '트로트',
-                genreHiphop: '랩/힙합',
-                genreRock: '락/인디',
-                genreWorldtour: '내한공연',
-                genreFanmeeting: '팬미팅',
-                genreFestival: '페스티벌',
-                genreEtc: '기타'
-            },
-            en: {
-                title: 'Performance Info',
-                subtitle: 'Concert · Musical · Theater · K-POP · World Tour',
-                lastUpdate: 'Last Update',
-                search: 'Search',
-                keyword: 'Keyword',
-                keywordPlaceholder: 'Enter artist or show name...',
-                startDate: 'Start Date',
-                endDate: 'End Date',
-                searchBtn: 'Search',
-                listView: '📋 List View',
-                calendarView: '📅 Calendar View',
-                concert: '🎤 Concert',
-                theater: '🎭 Theater & Musical',
-                all: 'All',
-                interpark: 'Interpark',
-                melon: 'Melon',
-                seoul: 'Seoul',
-                gyeonggi: 'Gyeonggi',
-                gangwon: 'Gangwon',
-                chungcheong: 'Chungcheong',
-                jeolla: 'Jeolla',
-                gyeongsang: 'Gyeongsang',
-                jeju: 'Jeju',
-                notification: 'Notification',
-                inactive: 'Inactive',
-                active: 'Active',
-                unsupportedDevice: 'Unsupported',
-                favorites: 'Favorites',
-                total: 'Total',
-                venue: 'Venue',
-                period: 'Period',
-                date: 'Date',
-                ticketOpen: 'Ticket Open',
-                noResults: 'No results found',
-                tryOther: 'Try different keywords or dates.',
-                loading: 'Loading performance data',
-                loadingKopis: 'Fetching KOPIS data...',
-                performanceList: 'Performance List',
-                sortByDday: 'Sorted by D-day',
-                ticketOpenCalendar: '🎫 Ticket Open Calendar',
-                concertCalendar: '🎤 Concert Calendar',
-                genre: 'Genre',
-                price: 'Price',
-                cast: 'Cast',
-                status: 'Status',
-                booking: 'Book',
-                noTitle: 'No Title',
-                addFavorite: 'Add Favorite',
-                removeFavorite: 'Remove Favorite',
-                addToFavorite: 'Add to Favorites',
-                count: '',
-                idol: 'K-Pop/Idol',
-                ballad: 'Ballad',
-                hiphop: 'Hip-Hop',
-                rock: 'Rock/Indie',
-                worldtour: 'World Tour',
-                fanmeeting: 'Fan Meeting',
-                festival: 'Festival',
-                trot: 'Trot',
-                etc: 'Others',
-                genreAll: 'All',
-                genreIdol: 'K-Pop/Idol',
-                genreBallad: 'Ballad',
-                genreTrot: 'Trot',
-                genreHiphop: 'Hip-Hop',
-                genreRock: 'Rock/Indie',
-                genreWorldtour: 'World Tour',
-                genreFanmeeting: 'Fan Meeting',
-                genreFestival: 'Festival',
-                genreEtc: 'Others'
-            },
-            ja: {
-                title: '公演統合情報',
-                subtitle: 'コンサート · ミュージカル · 演劇 · K-POP · 来韓公演',
-                lastUpdate: '最終更新',
-                search: '公演検索',
-                keyword: 'キーワード',
-                keywordPlaceholder: 'アーティスト、公演名を入力...',
-                startDate: '開始日',
-                endDate: '終了日',
-                searchBtn: '検索',
-                listView: '📋 リスト表示',
-                calendarView: '📅 カレンダー表示',
-                concert: '🎤 コンサート',
-                theater: '🎭 演劇 & ミュージカル',
-                all: '全体',
-                interpark: 'インターパーク',
-                melon: 'メロン',
-                seoul: 'ソウル',
-                gyeonggi: '京畿·仁川',
-                gangwon: '江原',
-                chungcheong: '忠清',
-                jeolla: '全羅',
-                gyeongsang: '慶尚',
-                jeju: '済州',
-                notification: '通知',
-                inactive: '無効',
-                active: '有効',
-                unsupportedDevice: '非対応',
-                favorites: 'お気に入り',
-                total: '全体',
-                venue: '会場',
-                period: '期間',
-                date: '日付',
-                ticketOpen: 'チケット発売',
-                noResults: '結果がありません',
-                tryOther: '他のキーワードや日付でお試しください。',
-                loading: '公演情報を読み込んでいます',
-                loadingKopis: 'KOPISデータ取得中...',
-                performanceList: '公演リスト',
-                sortByDday: 'D-day順',
-                ticketOpenCalendar: '🎫 チケット発売カレンダー',
-                concertCalendar: '🎤 公演日程カレンダー',
-                genre: 'ジャンル',
-                price: '価格',
-                cast: '出演',
-                status: '状態',
-                booking: '予約',
-                noTitle: 'タイトルなし',
-                addFavorite: 'お気に入り登録',
-                removeFavorite: 'お気に入り解除',
-                addToFavorite: 'お気に入りに追加',
-                count: '件',
-                idol: 'K-POP/アイドル',
-                ballad: 'バラード',
-                hiphop: 'ヒップホップ',
-                rock: 'ロック/インディー',
-                worldtour: '来韓公演',
-                fanmeeting: 'ファンミーティング',
-                festival: 'フェスティバル',
-                trot: 'トロット',
-                etc: 'その他',
-                genreAll: '全体',
-                genreIdol: 'K-POP/アイドル',
-                genreBallad: 'バラード',
-                genreTrot: 'トロット',
-                genreHiphop: 'ヒップホップ',
-                genreRock: 'ロック/インディー',
-                genreWorldtour: '来韓公演',
-                genreFanmeeting: 'ファンミ',
-                genreFestival: 'フェス',
-                genreEtc: 'その他'
-            },
-            zh: {
-                title: '演出综合信息',
-                subtitle: '演唱会 · 音乐剧 · 话剧 · K-POP · 巡回演出',
-                lastUpdate: '最后更新',
-                search: '搜索演出',
-                keyword: '关键词',
-                keywordPlaceholder: '输入艺人或演出名称...',
-                startDate: '开始日期',
-                endDate: '结束日期',
-                searchBtn: '搜索',
-                listView: '📋 列表视图',
-                calendarView: '📅 日历视图',
-                concert: '🎤 演唱会',
-                theater: '🎭 话剧 & 音乐剧',
-                all: '全部',
-                interpark: 'Interpark',
-                melon: 'Melon',
-                seoul: '首尔',
-                gyeonggi: '京畿·仁川',
-                gangwon: '江原',
-                chungcheong: '忠清',
-                jeolla: '全罗',
-                gyeongsang: '庆尚',
-                jeju: '济州',
-                notification: '通知',
-                inactive: '未启用',
-                active: '已启用',
-                unsupportedDevice: '不支持',
-                favorites: '收藏',
-                total: '总计',
-                venue: '场馆',
-                period: '时间',
-                date: '日期',
-                ticketOpen: '开票',
-                noResults: '没有结果',
-                tryOther: '请尝试其他关键词或日期。',
-                loading: '正在加载演出信息',
-                loadingKopis: '正在获取KOPIS数据...',
-                performanceList: '演出列表',
-                sortByDday: '按D-day排序',
-                ticketOpenCalendar: '🎫 开票日历',
-                concertCalendar: '🎤 演出日历',
-                genre: '类型',
-                price: '价格',
-                cast: '演员',
-                status: '状态',
-                booking: '预订',
-                noTitle: '无标题',
-                addFavorite: '收藏',
-                removeFavorite: '取消收藏',
-                addToFavorite: '添加收藏',
-                count: '个',
-                idol: 'K-POP/偶像',
-                ballad: '抒情',
-                hiphop: '嘻哈',
-                rock: '摇滚/独立',
-                worldtour: '巡演',
-                fanmeeting: '粉丝见面会',
-                festival: '音乐节',
-                trot: '演歌',
-                etc: '其他',
-                genreAll: '全部',
-                genreIdol: 'K-POP/偶像',
-                genreBallad: '抒情',
-                genreTrot: '演歌',
-                genreHiphop: '嘻哈',
-                genreRock: '摇滚/独立',
-                genreWorldtour: '巡演',
-                genreFanmeeting: '粉丝见面会',
-                genreFestival: '音乐节',
-                genreEtc: '其他'
-            },
-            es: {
-                title: 'Info de Espectáculos',
-                subtitle: 'Concierto · Musical · Teatro · K-POP · Gira Mundial',
-                lastUpdate: 'Última actualización',
-                search: 'Buscar',
-                keyword: 'Palabra clave',
-                keywordPlaceholder: 'Ingrese artista o nombre del show...',
-                startDate: 'Fecha inicio',
-                endDate: 'Fecha fin',
-                searchBtn: 'Buscar',
-                listView: '📋 Vista Lista',
-                calendarView: '📅 Vista Calendario',
-                concert: '🎤 Concierto',
-                theater: '🎭 Teatro & Musical',
-                all: 'Todo',
-                interpark: 'Interpark',
-                melon: 'Melon',
-                seoul: 'Seúl',
-                gyeonggi: 'Gyeonggi',
-                gangwon: 'Gangwon',
-                chungcheong: 'Chungcheong',
-                jeolla: 'Jeolla',
-                gyeongsang: 'Gyeongsang',
-                jeju: 'Jeju',
-                notification: 'Notificación',
-                inactive: 'Inactivo',
-                active: 'Activo',
-                unsupportedDevice: 'No soportado',
-                favorites: 'Favoritos',
-                total: 'Total',
-                venue: 'Lugar',
-                period: 'Período',
-                date: 'Fecha',
-                ticketOpen: 'Venta de boletos',
-                noResults: 'Sin resultados',
-                tryOther: 'Intente con otras palabras o fechas.',
-                loading: 'Cargando información',
-                loadingKopis: 'Obteniendo datos de KOPIS...',
-                performanceList: 'Lista de Espectáculos',
-                sortByDday: 'Ordenado por D-day',
-                ticketOpenCalendar: '🎫 Calendario de Ventas',
-                concertCalendar: '🎤 Calendario de Conciertos',
-                genre: 'Género',
-                price: 'Precio',
-                cast: 'Elenco',
-                status: 'Estado',
-                booking: 'Reservar',
-                noTitle: 'Sin Título',
-                addFavorite: 'Agregar Favorito',
-                removeFavorite: 'Quitar Favorito',
-                addToFavorite: 'Agregar a Favoritos',
-                count: '',
-                idol: 'K-Pop/Idol',
-                ballad: 'Balada',
-                hiphop: 'Hip-Hop',
-                rock: 'Rock/Indie',
-                worldtour: 'Gira Mundial',
-                fanmeeting: 'Fan Meeting',
-                festival: 'Festival',
-                trot: 'Trot',
-                etc: 'Otros',
-                genreAll: 'Todo',
-                genreIdol: 'K-Pop/Idol',
-                genreBallad: 'Balada',
-                genreTrot: 'Trot',
-                genreHiphop: 'Hip-Hop',
-                genreRock: 'Rock/Indie',
-                genreWorldtour: 'Gira Mundial',
-                genreFanmeeting: 'Fan Meeting',
-                genreFestival: 'Festival',
-                genreEtc: 'Otros'
-            }
-        };
-
+        // PO 파일 기반 번역 시스템
+        let i18nData = {};
         let currentLang = localStorage.getItem('ticket_lang') || 'ko';
 
-        // 번역 캐시 (LocalStorage)
-        const translationCache = JSON.parse(localStorage.getItem('ticket_translations') || '{}');
-        let isTranslating = false;
-
-        function saveTranslationCache() {
-            // 캐시 크기 제한 (최대 500개)
-            const keys = Object.keys(translationCache);
-            if (keys.length > 500) {
-                keys.slice(0, keys.length - 500).forEach(k => delete translationCache[k]);
-            }
-            localStorage.setItem('ticket_translations', JSON.stringify(translationCache));
-        }
-
-        async function translateText(text, toLang) {
-            if (!text || toLang === 'ko') return text;
-
-            const cacheKey = `${text}|${toLang}`;
-            if (translationCache[cacheKey]) {
-                return translationCache[cacheKey];
-            }
-
+        async function loadTranslations(lang) {
             try {
-                const response = await fetch(`/api/translate?text=${encodeURIComponent(text)}&to=${toLang}&from=ko`);
-                const data = await response.json();
-                if (data.success) {
-                    translationCache[cacheKey] = data.translated;
-                    return data.translated;
+                const response = await fetch(`/api/i18n/${lang}`);
+                if (response.ok) {
+                    i18nData[lang] = await response.json();
                 }
             } catch (e) {
-                console.error('번역 오류:', e);
+                console.error(`[i18n] ${lang} 번역 로드 실패:`, e);
             }
-            return text;
         }
 
-        async function translateDataForDisplay() {
-            if (currentLang === 'ko' || !allData || allData.length === 0) {
-                renderResults();
-                return;
+        async function initI18n() {
+            await loadTranslations('ko');
+            if (currentLang !== 'ko') {
+                await loadTranslations(currentLang);
             }
-
-            isTranslating = true;
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = `<div class="loading-container"><div class="loading-spinner-lg"></div><h3>🌐 ${currentLang === 'en' ? 'Translating...' : currentLang === 'ja' ? '翻訳中...' : currentLang === 'zh' ? '翻译中...' : 'Traduciendo...'}</h3></div>`;
-
-            // 현재 필터된 데이터만 번역 (최대 30개)
-            let filteredData = allData.filter(item => (item.part || 'concert') === currentPart);
-            if (currentSource !== 'all') {
-                filteredData = filteredData.filter(item => {
-                    if (item.available_sites) return item.available_sites.some(site => site.name === currentSource);
-                    return item.source === currentSource;
-                });
-            }
-            if (currentRegion !== 'all') {
-                filteredData = filteredData.filter(item => item.region === currentRegion);
-            }
-
-            const toTranslate = filteredData.slice(0, 30);
-
-            for (const item of toTranslate) {
-                const hash = item.hash;
-                if (!hash) continue;
-
-                // 이미 번역된 경우 스킵
-                const cacheKey = `${item.name}|${currentLang}`;
-                if (translationCache[cacheKey]) {
-                    item._translated_name = translationCache[cacheKey];
-                } else if (item.name) {
-                    item._translated_name = await translateText(item.name, currentLang);
-                }
-
-                const venueCacheKey = `${item.venue}|${currentLang}`;
-                if (translationCache[venueCacheKey]) {
-                    item._translated_venue = translationCache[venueCacheKey];
-                } else if (item.venue) {
-                    item._translated_venue = await translateText(item.venue, currentLang);
-                }
-            }
-
-            saveTranslationCache();
-            isTranslating = false;
-            renderResults();
+            applyLanguage();
         }
 
-        function changeLanguage(lang) {
+        async function changeLanguage(lang) {
             currentLang = lang;
             localStorage.setItem('ticket_lang', lang);
+            if (!i18nData[lang]) {
+                await loadTranslations(lang);
+            }
             applyLanguage();
-
-            // 한국어가 아니면 데이터 번역
-            if (lang !== 'ko' && allData && allData.length > 0) {
-                translateDataForDisplay();
+            if (allData && allData.length > 0) {
+                renderResults();
             }
         }
 
         function applyLanguage() {
-            const texts = i18n[currentLang];
+            const texts = i18nData[currentLang] || i18nData['ko'] || {};
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (texts[key]) {
@@ -1987,22 +1563,38 @@
                 }
             });
             document.getElementById('langSelect').value = currentLang;
-            document.title = texts.title;
-            // 현재 표시된 결과가 있으면 다시 렌더링 (한국어일때만)
-            if (currentLang === 'ko' && allData && allData.length > 0) {
-                renderResults();
-            }
+            document.title = texts.title || '공연 통합 정보';
         }
 
         function t(key) {
-            return i18n[currentLang][key] || i18n['ko'][key] || key;
+            if (i18nData[currentLang] && i18nData[currentLang][key] !== undefined) return i18nData[currentLang][key];
+            if (i18nData['ko'] && i18nData['ko'][key] !== undefined) return i18nData['ko'][key];
+            return key;
         }
 
-        // 번역된 텍스트 반환 (없으면 원본)
+        // 사전 번역된 데이터에서 번역 텍스트 반환
         function getTranslatedText(item, field) {
             if (currentLang === 'ko') return item[field] || '';
-            const translatedField = `_translated_${field}`;
-            return item[translatedField] || item[field] || '';
+            return item[`${field}_${currentLang}`] || item[field] || '';
+        }
+
+        // 지역명 → i18n 키 매핑
+        function getRegionI18nKey(region) {
+            const map = {
+                '서울': 'seoul', '경기·인천': 'gyeonggi', '강원': 'gangwon',
+                '충청': 'chungcheong', '전라': 'jeolla', '경상': 'gyeongsang', '제주': 'jeju'
+            };
+            return map[region] || region;
+        }
+
+        // 카테고리명 → i18n 키 매핑
+        function getCategoryI18nKey(category) {
+            const map = {
+                '아이돌': 'idol', '발라드': 'ballad', '랩/힙합': 'hiphop',
+                '락/인디': 'rock', '내한공연': 'worldtour', '팬미팅': 'fanmeeting',
+                '페스티벌': 'festival', '트로트': 'trot', '기타': 'etc'
+            };
+            return map[category] || category;
         }
 
         // 현재 날짜 설정
@@ -2170,7 +1762,7 @@
                         const dateMatch = item.ticket_open.match(/(\d{4})\.(\d{2})\.(\d{2})/);
                         if (dateMatch) {
                             events.push({
-                                title: item.name.substring(0, 20) + (item.name.length > 20 ? '...' : ''),
+                                title: getTranslatedText(item, 'name').substring(0, 20) + (getTranslatedText(item, 'name').length > 20 ? '...' : ''),
                                 start: `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`,
                                 className: 'ticket-open',
                                 extendedProps: { item: item }
@@ -2443,7 +2035,7 @@
                     const ddayBadge = getDdayBadge(item.dday);
                     const siteBadges = getSiteBadges(item.available_sites);
                     const categoryBadge = item.category ?
-                        `<span class="category-badge">${item.category}</span>` : '';
+                        `<span class="category-badge">${t(getCategoryI18nKey(item.category))}</span>` : '';
 
                     // YES24/멜론 이미지는 캐싱 프록시 사용
                     let posterUrl = item.poster || '';
@@ -2471,7 +2063,7 @@
                                 ${item.date ? `<div class="card-info"><span>${t('date')}</span> ${item.date}</div>` : ''}
                                 ${item.ticket_open ? `<div class="card-info"><span>${t('ticketOpen')}</span> ${item.ticket_open}</div>` : ''}
                                 <div class="site-badges">${siteBadges}</div>
-                                ${item.region ? `<span class="region-badge" style="background: ${getRegionColor(item.region)}30; color: ${getRegionColor(item.region)}">${item.region}</span>` : ''}
+                                ${item.region ? `<span class="region-badge" style="background: ${getRegionColor(item.region)}30; color: ${getRegionColor(item.region)}">${t(getRegionI18nKey(item.region))}</span>` : ''}
                             </div>
                         </div>
                     `;
@@ -2927,8 +2519,8 @@
 
 
         // 페이지 로드 시 자동 조회
-        window.onload = function() {
-            applyLanguage();
+        window.onload = async function() {
+            await initI18n();
             initNotification();
             loadAllData();
         };

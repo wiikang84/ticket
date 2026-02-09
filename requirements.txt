@@ -6,3 +6,4 @@ gunicorn
 APScheduler
 selenium
 webdriver-manager
+polib

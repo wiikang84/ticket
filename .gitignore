@@ -23,3 +23,7 @@ Thumbs.db
 # Environment
 .env
 .env.local
+
+# Translation cache
+translation_cache.json
+image_cache/

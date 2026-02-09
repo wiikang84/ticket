@@ -1,0 +1,218 @@
+# English UI translations
+# Copyright (C) 2026
+# This file is distributed under the same license as the ticket project.
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+
+msgid "title"
+msgstr "Performance Info"
+
+msgid "subtitle"
+msgstr "Concert · Musical · Theater · K-POP · World Tour"
+
+msgid "lastUpdate"
+msgstr "Last Update"
+
+msgid "search"
+msgstr "Search"
+
+msgid "keyword"
+msgstr "Keyword"
+
+msgid "keywordPlaceholder"
+msgstr "Enter artist or show name..."
+
+msgid "startDate"
+msgstr "Start Date"
+
+msgid "endDate"
+msgstr "End Date"
+
+msgid "searchBtn"
+msgstr "Search"
+
+msgid "listView"
+msgstr "📋 List View"
+
+msgid "calendarView"
+msgstr "📅 Calendar View"
+
+msgid "concert"
+msgstr "🎤 Concert"
+
+msgid "theater"
+msgstr "🎭 Theater & Musical"
+
+msgid "all"
+msgstr "All"
+
+msgid "interpark"
+msgstr "Interpark"
+
+msgid "melon"
+msgstr "Melon"
+
+msgid "seoul"
+msgstr "Seoul"
+
+msgid "gyeonggi"
+msgstr "Gyeonggi"
+
+msgid "gangwon"
+msgstr "Gangwon"
+
+msgid "chungcheong"
+msgstr "Chungcheong"
+
+msgid "jeolla"
+msgstr "Jeolla"
+
+msgid "gyeongsang"
+msgstr "Gyeongsang"
+
+msgid "jeju"
+msgstr "Jeju"
+
+msgid "notification"
+msgstr "Notification"
+
+msgid "inactive"
+msgstr "Inactive"
+
+msgid "active"
+msgstr "Active"
+
+msgid "unsupportedDevice"
+msgstr "Unsupported"
+
+msgid "favorites"
+msgstr "Favorites"
+
+msgid "total"
+msgstr "Total"
+
+msgid "venue"
+msgstr "Venue"
+
+msgid "period"
+msgstr "Period"
+
+msgid "date"
+msgstr "Date"
+
+msgid "ticketOpen"
+msgstr "Ticket Open"
+
+msgid "noResults"
+msgstr "No results found"
+
+msgid "tryOther"
+msgstr "Try different keywords or dates."
+
+msgid "loading"
+msgstr "Loading performance data"
+
+msgid "loadingKopis"
+msgstr "Fetching KOPIS data..."
+
+msgid "performanceList"
+msgstr "Performance List"
+
+msgid "sortByDday"
+msgstr "Sorted by D-day"
+
+msgid "ticketOpenCalendar"
+msgstr "🎫 Ticket Open Calendar"
+
+msgid "concertCalendar"
+msgstr "🎤 Concert Calendar"
+
+msgid "genre"
+msgstr "Genre"
+
+msgid "price"
+msgstr "Price"
+
+msgid "cast"
+msgstr "Cast"
+
+msgid "status"
+msgstr "Status"
+
+msgid "booking"
+msgstr "Book"
+
+msgid "noTitle"
+msgstr "No Title"
+
+msgid "addFavorite"
+msgstr "Add Favorite"
+
+msgid "removeFavorite"
+msgstr "Remove Favorite"
+
+msgid "addToFavorite"
+msgstr "Add to Favorites"
+
+msgid "count"
+msgstr ""
+
+msgid "idol"
+msgstr "K-Pop/Idol"
+
+msgid "ballad"
+msgstr "Ballad"
+
+msgid "hiphop"
+msgstr "Hip-Hop"
+
+msgid "rock"
+msgstr "Rock/Indie"
+
+msgid "worldtour"
+msgstr "World Tour"
+
+msgid "fanmeeting"
+msgstr "Fan Meeting"
+
+msgid "festival"
+msgstr "Festival"
+
+msgid "trot"
+msgstr "Trot"
+
+msgid "etc"
+msgstr "Others"
+
+msgid "genreAll"
+msgstr "All"
+
+msgid "genreIdol"
+msgstr "K-Pop/Idol"
+
+msgid "genreBallad"
+msgstr "Ballad"
+
+msgid "genreTrot"
+msgstr "Trot"
+
+msgid "genreHiphop"
+msgstr "Hip-Hop"
+
+msgid "genreRock"
+msgstr "Rock/Indie"
+
+msgid "genreWorldtour"
+msgstr "World Tour"
+
+msgid "genreFanmeeting"
+msgstr "Fan Meeting"
+
+msgid "genreFestival"
+msgstr "Festival"
+
+msgid "genreEtc"
+msgstr "Others"

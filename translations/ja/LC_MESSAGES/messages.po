@@ -1,0 +1,218 @@
+# Japanese UI translations
+# Copyright (C) 2026
+# This file is distributed under the same license as the ticket project.
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ja\n"
+
+msgid "title"
+msgstr "公演統合情報"
+
+msgid "subtitle"
+msgstr "コンサート · ミュージカル · 演劇 · K-POP · 来韓公演"
+
+msgid "lastUpdate"
+msgstr "最終更新"
+
+msgid "search"
+msgstr "公演検索"
+
+msgid "keyword"
+msgstr "キーワード"
+
+msgid "keywordPlaceholder"
+msgstr "アーティスト、公演名を入力..."
+
+msgid "startDate"
+msgstr "開始日"
+
+msgid "endDate"
+msgstr "終了日"
+
+msgid "searchBtn"
+msgstr "検索"
+
+msgid "listView"
+msgstr "📋 リスト表示"
+
+msgid "calendarView"
+msgstr "📅 カレンダー表示"
+
+msgid "concert"
+msgstr "🎤 コンサート"
+
+msgid "theater"
+msgstr "🎭 演劇 & ミュージカル"
+
+msgid "all"
+msgstr "全体"
+
+msgid "interpark"
+msgstr "インターパーク"
+
+msgid "melon"
+msgstr "メロン"
+
+msgid "seoul"
+msgstr "ソウル"
+
+msgid "gyeonggi"
+msgstr "京畿·仁川"
+
+msgid "gangwon"
+msgstr "江原"
+
+msgid "chungcheong"
+msgstr "忠清"
+
+msgid "jeolla"
+msgstr "全羅"
+
+msgid "gyeongsang"
+msgstr "慶尚"
+
+msgid "jeju"
+msgstr "済州"
+
+msgid "notification"
+msgstr "通知"
+
+msgid "inactive"
+msgstr "無効"
+
+msgid "active"
+msgstr "有効"
+
+msgid "unsupportedDevice"
+msgstr "非対応"
+
+msgid "favorites"
+msgstr "お気に入り"
+
+msgid "total"
+msgstr "全体"
+
+msgid "venue"
+msgstr "会場"
+
+msgid "period"
+msgstr "期間"
+
+msgid "date"
+msgstr "日付"
+
+msgid "ticketOpen"
+msgstr "チケット発売"
+
+msgid "noResults"
+msgstr "結果がありません"
+
+msgid "tryOther"
+msgstr "他のキーワードや日付でお試しください。"
+
+msgid "loading"
+msgstr "公演情報を読み込んでいます"
+
+msgid "loadingKopis"
+msgstr "KOPISデータ取得中..."
+
+msgid "performanceList"
+msgstr "公演リスト"
+
+msgid "sortByDday"
+msgstr "D-day順"
+
+msgid "ticketOpenCalendar"
+msgstr "🎫 チケット発売カレンダー"
+
+msgid "concertCalendar"
+msgstr "🎤 公演日程カレンダー"
+
+msgid "genre"
+msgstr "ジャンル"
+
+msgid "price"
+msgstr "価格"
+
+msgid "cast"
+msgstr "出演"
+
+msgid "status"
+msgstr "状態"
+
+msgid "booking"
+msgstr "予約"
+
+msgid "noTitle"
+msgstr "タイトルなし"
+
+msgid "addFavorite"
+msgstr "お気に入り登録"
+
+msgid "removeFavorite"
+msgstr "お気に入り解除"
+
+msgid "addToFavorite"
+msgstr "お気に入りに追加"
+
+msgid "count"
+msgstr "件"
+
+msgid "idol"
+msgstr "K-POP/アイドル"
+
+msgid "ballad"
+msgstr "バラード"
+
+msgid "hiphop"
+msgstr "ヒップホップ"
+
+msgid "rock"
+msgstr "ロック/インディー"
+
+msgid "worldtour"
+msgstr "来韓公演"
+
+msgid "fanmeeting"
+msgstr "ファンミーティング"
+
+msgid "festival"
+msgstr "フェスティバル"
+
+msgid "trot"
+msgstr "トロット"
+
+msgid "etc"
+msgstr "その他"
+
+msgid "genreAll"
+msgstr "全体"
+
+msgid "genreIdol"
+msgstr "K-POP/アイドル"
+
+msgid "genreBallad"
+msgstr "バラード"
+
+msgid "genreTrot"
+msgstr "トロット"
+
+msgid "genreHiphop"
+msgstr "ヒップホップ"
+
+msgid "genreRock"
+msgstr "ロック/インディー"
+
+msgid "genreWorldtour"
+msgstr "来韓公演"
+
+msgid "genreFanmeeting"
+msgstr "ファンミ"
+
+msgid "genreFestival"
+msgstr "フェス"
+
+msgid "genreEtc"
+msgstr "その他"
