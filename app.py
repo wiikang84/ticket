@@ -1337,12 +1337,16 @@ def translate_text(text, from_lang='ko', to_lang='en'):
     if not text or from_lang == to_lang:
         return text
 
-    # 캐시 키
-    cache_key = f"{text}|{from_lang}|{to_lang}"
+    # 캐시 키 (text|to_lang 형식으로 통일)
+    cache_key = f"{text}|{to_lang}"
 
     with translation_cache_lock:
         if cache_key in translation_cache:
             return translation_cache[cache_key]
+        # 이전 형식 호환 (text|from|to)
+        old_key = f"{text}|{from_lang}|{to_lang}"
+        if old_key in translation_cache:
+            return translation_cache[old_key]
 
     try:
         # MyMemory API 호출
