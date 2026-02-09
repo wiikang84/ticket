@@ -6,6 +6,7 @@ Selenium 크롤러 (별도 프로세스)
 
 import sys
 import json
+import os
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -99,7 +100,9 @@ def get_undetected_driver():
     options.add_argument('--window-position=-2400,-2400')
 
     # headless=False로 실행 (봇 탐지 우회)
-    driver = uc.Chrome(options=options, headless=False, version_main=144)
+    chrome_version = os.environ.get('CHROME_VERSION_MAIN')
+    version_kwargs = {'version_main': int(chrome_version)} if chrome_version else {}
+    driver = uc.Chrome(options=options, headless=False, **version_kwargs)
     return driver
 
 def crawl_melon():
@@ -173,14 +176,17 @@ def crawl_melon():
                     'part': classify_part(title),  # 파트 분류
                     'hash': get_cache_key(title)
                 })
-            except:
+            except Exception:
                 continue
 
     except Exception as e:
         return {'success': False, 'error': str(e), 'data': []}
     finally:
         if driver:
-            driver.quit()
+            try:
+                driver.quit()
+            except Exception:
+                pass
 
     # 중복 제거
     seen = set()
@@ -317,9 +323,9 @@ def crawl_yes24():
                             'part': item_part,  # 파트 분류
                             'hash': get_cache_key(title)
                         })
-                    except:
+                    except Exception:
                         continue
-            except:
+            except Exception:
                 continue  # 개별 장르 페이지 오류 시 다음으로
 
     except Exception as e:
@@ -328,7 +334,7 @@ def crawl_yes24():
         if driver:
             try:
                 driver.quit()
-            except:
+            except Exception:
                 pass
 
     seen = set()
@@ -401,7 +407,10 @@ def crawl_melon_detail(prod_id):
         return {'success': False, 'error': str(e), 'data': {}}
     finally:
         if driver:
-            driver.quit()
+            try:
+                driver.quit()
+            except Exception:
+                pass
 
 
 def crawl_yes24_detail(perf_code):
@@ -484,7 +493,7 @@ def crawl_yes24_detail(perf_code):
         if driver:
             try:
                 driver.quit()
-            except:
+            except Exception:
                 pass
 
 

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>콘서트 통합 정보</title>
     <!-- FullCalendar -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' integrity="sha384-a+uEN0SA9NPmaoLnc5WsmxDS2SgEiUlzTisgqmWvaOsxzPREhiatn8EIBuY/Zsl2" crossorigin="anonymous" />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js' integrity="sha384-WfE/vOHqht3KDj6FvpwQUf3UxEPUHoGJ3w1yZ8rhpLWnVigt8HjXL2zXqtcfS7mf" crossorigin="anonymous"></script>
     <style>
         * {
             margin: 0;
@@ -1511,6 +1511,25 @@
 
     <script>
         // =============================================
+        // 보안 유틸리티
+        // =============================================
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(String(str)));
+            return div.innerHTML;
+        }
+
+        function sanitizeUrl(url) {
+            if (!url) return '';
+            const trimmed = url.trim().toLowerCase();
+            if (trimmed.startsWith('javascript:') || trimmed.startsWith('data:') || trimmed.startsWith('vbscript:')) {
+                return '';
+            }
+            return url;
+        }
+
+        // =============================================
         // 다국어 지원 (i18n)
         // =============================================
         // PO 파일 기반 번역 시스템
@@ -1896,11 +1915,11 @@
                             if (bar) bar.textContent = '⚠️ 멜론·YES24 추가 로딩 실패 (Selenium 필요)';
                         });
                 } else {
-                    resultsDiv.innerHTML = `<div class="empty-state"><h3>오류 발생</h3><p>${fastResult.error}</p></div>`;
+                    resultsDiv.innerHTML = `<div class="empty-state"><h3>오류 발생</h3><p>${escapeHtml(fastResult.error)}</p></div>`;
                 }
             } catch (error) {
                 clearInterval(tipInterval);
-                resultsDiv.innerHTML = `<div class="empty-state"><h3>오류 발생</h3><p>${error.message}</p></div>`;
+                resultsDiv.innerHTML = `<div class="empty-state"><h3>오류 발생</h3><p>${escapeHtml(error.message)}</p></div>`;
             }
         }
 
@@ -1963,7 +1982,7 @@
                             site.name === '인터파크' ? 'I' :
                             site.name === '멜론티켓' ? 'M' :
                             site.name === 'YES24' ? 'Y' : '?';
-                return `<span class="site-badge" style="background: ${site.color}30; color: ${site.color}" title="${site.name}">${icon}</span>`;
+                return `<span class="site-badge" style="background: ${escapeHtml(site.color)}30; color: ${escapeHtml(site.color)}" title="${escapeHtml(site.name)}">${icon}</span>`;
             }).join('');
         }
 
@@ -2049,19 +2068,19 @@
                     const displayVenue = getTranslatedText(item, 'venue');
 
                     html += `
-                        <div class="card" data-hash="${item.hash}">
+                        <div class="card" data-hash="${escapeHtml(item.hash)}">
                             <div class="card-img">
-                                ${posterUrl ? `<img src="${posterUrl}" alt="${displayName}" loading="lazy" onerror="this.onerror=null; this.style.display='none'; this.parentElement.classList.add('no-poster');">` : ''}
+                                ${posterUrl ? `<img src="${escapeHtml(posterUrl)}" alt="${escapeHtml(displayName)}" loading="lazy" onerror="this.onerror=null; this.style.display='none'; this.parentElement.classList.add('no-poster');">` : ''}
                                 ${ddayBadge}
                                 ${categoryBadge}
-                                <button class="fav-btn ${isFav ? 'active' : ''}" data-hash="${item.hash}" onclick="event.stopPropagation(); toggleFavorite('${item.hash}', this);" title="${t('addFavorite')}">${isFav ? '♥' : '♡'}</button>
+                                <button class="fav-btn ${isFav ? 'active' : ''}" data-fav-hash="${escapeHtml(item.hash)}" title="${t('addFavorite')}">${isFav ? '♥' : '♡'}</button>
                             </div>
                             <div class="card-body">
-                                <div class="card-title">${displayName}</div>
-                                ${displayVenue ? `<div class="card-info"><span>${t('venue')}</span> ${displayVenue}</div>` : ''}
-                                ${item.start_date ? `<div class="card-info"><span>${t('period')}</span> ${item.start_date} ~ ${item.end_date || ''}</div>` : ''}
-                                ${item.date ? `<div class="card-info"><span>${t('date')}</span> ${item.date}</div>` : ''}
-                                ${item.ticket_open ? `<div class="card-info"><span>${t('ticketOpen')}</span> ${item.ticket_open}</div>` : ''}
+                                <div class="card-title">${escapeHtml(displayName)}</div>
+                                ${displayVenue ? `<div class="card-info"><span>${t('venue')}</span> ${escapeHtml(displayVenue)}</div>` : ''}
+                                ${item.start_date ? `<div class="card-info"><span>${t('period')}</span> ${escapeHtml(item.start_date)} ~ ${escapeHtml(item.end_date || '')}</div>` : ''}
+                                ${item.date ? `<div class="card-info"><span>${t('date')}</span> ${escapeHtml(item.date)}</div>` : ''}
+                                ${item.ticket_open ? `<div class="card-info"><span>${t('ticketOpen')}</span> ${escapeHtml(item.ticket_open)}</div>` : ''}
                                 <div class="site-badges">${siteBadges}</div>
                                 ${item.region ? `<span class="region-badge" style="background: ${getRegionColor(item.region)}30; color: ${getRegionColor(item.region)}">${t(getRegionI18nKey(item.region))}</span>` : ''}
                             </div>
@@ -2097,9 +2116,16 @@
             const displayName = getTranslatedText(item, 'name') || t('noTitle');
             const displayVenue = getTranslatedText(item, 'venue') || '-';
 
-            // 기본 정보 설정 + 찜 버튼
+            // 기본 정보 설정 + 찜 버튼 (DOM API로 안전하게 구성)
             const isFav = isFavorite(item.hash);
-            document.getElementById('modalTitle').innerHTML = `${displayName}<button class="modal-fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${item.hash}', this, true)">${isFav ? '♥ ' + t('removeFavorite') : '♡ ' + t('addToFavorite')}</button>`;
+            const titleEl = document.getElementById('modalTitle');
+            titleEl.textContent = '';
+            titleEl.appendChild(document.createTextNode(displayName));
+            const modalFavBtn = document.createElement('button');
+            modalFavBtn.className = `modal-fav-btn ${isFav ? 'active' : ''}`;
+            modalFavBtn.textContent = isFav ? '♥ ' + t('removeFavorite') : '♡ ' + t('addToFavorite');
+            modalFavBtn.addEventListener('click', function() { toggleFavorite(item.hash, this, true); });
+            titleEl.appendChild(modalFavBtn);
             document.getElementById('modalVenue').textContent = displayVenue;
             document.getElementById('modalGenre').textContent = item.genre || '-';
             document.getElementById('modalState').textContent = item.state || '-';
@@ -2121,7 +2147,7 @@
                 if (modalPosterUrl.includes('yes24.com') || modalPosterUrl.includes('melon.com') || modalPosterUrl.includes('tkfile')) {
                     modalPosterUrl = '/api/proxy/image?url=' + encodeURIComponent(modalPosterUrl);
                 }
-                posterDiv.innerHTML = `<img src="${modalPosterUrl}" alt="${displayName}" onerror="this.parentElement.innerHTML='<span>No Image</span>'">`;
+                posterDiv.innerHTML = `<img src="${escapeHtml(modalPosterUrl)}" alt="${escapeHtml(displayName)}" onerror="this.parentElement.innerHTML='<span>No Image</span>'">`;
             } else {
                 posterDiv.innerHTML = '<span>No Image</span>';
             }
@@ -2159,7 +2185,7 @@
                         let linksHtml = '';
                         if (detail.booking_sites && detail.booking_sites.length > 0) {
                             detail.booking_sites.forEach(site => {
-                                linksHtml += `<a href="${site.url}" target="_blank" class="modal-link-btn" style="background: ${site.color}; color: #fff;">${site.name} 예매</a>`;
+                                linksHtml += `<a href="${sanitizeUrl(escapeHtml(site.url))}" target="_blank" rel="noopener noreferrer" class="modal-link-btn" style="background: ${escapeHtml(site.color)}; color: #fff;">${escapeHtml(site.name)} 예매</a>`;
                             });
                             linksDiv.innerHTML = linksHtml;
                         } else {
@@ -2186,7 +2212,7 @@
                 if (item.available_sites && item.available_sites.length > 0) {
                     item.available_sites.forEach(site => {
                         if (site.link && site.link !== '') {
-                            linksHtml += `<a href="${site.link}" target="_blank" class="modal-link-btn" style="background: ${site.color}; color: #fff;">${site.name} 예매</a>`;
+                            linksHtml += `<a href="${sanitizeUrl(escapeHtml(site.link))}" target="_blank" rel="noopener noreferrer" class="modal-link-btn" style="background: ${escapeHtml(site.color)}; color: #fff;">${escapeHtml(site.name)} 예매</a>`;
                         }
                     });
                 }
@@ -2213,8 +2239,17 @@
             }
         });
 
-        // iOS 터치 이벤트 최적화 - 카드 클릭 (이벤트 위임)
+        // iOS 터치 이벤트 최적화 - 카드 클릭 + 찜 버튼 (이벤트 위임)
         document.getElementById('results').addEventListener('click', function(e) {
+            // 찜 버튼 클릭 처리
+            const favBtn = e.target.closest('.fav-btn');
+            if (favBtn) {
+                e.stopPropagation();
+                const hash = favBtn.dataset.favHash;
+                if (hash) toggleFavorite(hash, favBtn);
+                return;
+            }
+            // 카드 클릭 처리
             const card = e.target.closest('.card');
             if (card) {
                 const hash = card.dataset.hash;

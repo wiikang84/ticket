@@ -13,6 +13,11 @@ from bs4 import BeautifulSoup
 import re
 import json
 import hashlib
+from urllib.parse import urlparse
+import ipaddress
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Selenium for dynamic page crawling
 from selenium import webdriver
@@ -64,11 +69,63 @@ def get_chrome_driver():
     return driver
 
 app = Flask(__name__)
-CORS(app)
+ALLOWED_ORIGINS = os.environ.get('ALLOWED_ORIGINS', '*').split(',')
+CORS(app, origins=ALLOWED_ORIGINS)
+# TODO: Rate Limiting 도입 시 flask-limiter 사용
+# from flask_limiter import Limiter
+# limiter = Limiter(app=app, default_limits=["200 per hour"])
+
+@app.after_request
+def set_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "img-src 'self' data: https: http:; "
+        "font-src 'self' https://cdn.jsdelivr.net; "
+        "connect-src 'self'; "
+        "frame-ancestors 'self'"
+    )
+    return response
 
 # KOPIS API 설정
-KOPIS_API_KEY = "2012e419e6c24bfa988ca56e2917d3c0"
+KOPIS_API_KEY = os.environ.get('KOPIS_API_KEY', '')
+if not KOPIS_API_KEY:
+    logging.warning("KOPIS_API_KEY 환경변수가 설정되지 않았습니다. .env 파일을 확인하세요.")
 KOPIS_BASE_URL = "http://www.kopis.or.kr/openApi/restful"
+
+# SSRF 방어용 이미지 프록시 허용 도메인
+ALLOWED_IMAGE_DOMAINS = [
+    'www.kopis.or.kr', 'kopis.or.kr',
+    'tickets.interpark.com', 'ticketimage.interpark.com',
+    'ticket.melon.com', 'cdnticket.melon.co.kr', 'cdnimg.melon.co.kr',
+    'ticket.yes24.com', 'tkfile.yes24.com', 'image.yes24.com',
+]
+
+def is_safe_url(url):
+    """URL 안전성 검증 (SSRF 방지)"""
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ('http', 'https'):
+            return False
+        hostname = parsed.hostname
+        if not hostname:
+            return False
+        if not any(hostname == d or hostname.endswith('.' + d) for d in ALLOWED_IMAGE_DOMAINS):
+            return False
+        try:
+            ip = ipaddress.ip_address(hostname)
+            if ip.is_private or ip.is_loopback or ip.is_reserved:
+                return False
+        except ValueError:
+            pass
+        return True
+    except Exception:
+        return False
 
 # KOPIS 장르 코드
 GENRE_CODE_CONCERT = "CCCD"  # 대중음악/콘서트
@@ -211,6 +268,13 @@ cache = {
 }
 cache_lock = threading.Lock()
 
+# 기본 로깅 설정
+logging.basicConfig(
+    level=logging.INFO,
+    format='[%(asctime)s] %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
 # 스케줄러 로거
 scheduler_logger = logging.getLogger('scheduler')
 scheduler_logger.setLevel(logging.INFO)
@@ -240,7 +304,7 @@ def calculate_dday(date_str):
             today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
             diff = (target - today).days
             return diff
-    except:
+    except Exception:
         pass
     return None
 
@@ -305,7 +369,8 @@ def get_kopis_performances():
             return jsonify({'success': False, 'error': f'API 오류: {response.status_code}'})
 
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        logging.error(f"KOPIS 공연 조회 오류: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': '공연 데이터를 불러오는 중 오류가 발생했습니다.'})
 
 
 @app.route('/api/kopis/performance/<perf_id>')
@@ -366,7 +431,8 @@ def get_kopis_performance_detail(perf_id):
         return jsonify({'success': False, 'error': '공연 정보를 찾을 수 없습니다.'})
 
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        logging.error(f"KOPIS 상세 조회 오류: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': '공연 상세 정보를 불러오는 중 오류가 발생했습니다.'})
 
 
 @app.route('/api/ticketing/interpark')
@@ -423,7 +489,7 @@ def get_interpark_tickets():
                             start_fmt = f"{start_date[:4]}.{start_date[4:6]}.{start_date[6:]}"
                             end_fmt = f"{end_date[:4]}.{end_date[4:6]}.{end_date[6:]}"
                             date_str = f"{start_fmt} - {end_fmt}" if start_date != end_date else start_fmt
-                        except:
+                        except Exception:
                             date_str = ''
                             start_fmt = ''
 
@@ -434,7 +500,7 @@ def get_interpark_tickets():
                             try:
                                 ticket_open_fmt = f"{ticket_open[:4]}.{ticket_open[4:6]}.{ticket_open[6:8]}"
                                 ticket_dday = calculate_dday(ticket_open_fmt)
-                            except:
+                            except Exception:
                                 pass
 
                         # 예매오픈일 없으면 공연 시작 2주 전으로 추정
@@ -446,7 +512,7 @@ def get_interpark_tickets():
                                 if estimated_open >= datetime.now():
                                     ticket_open_fmt = estimated_open.strftime('%Y.%m.%d') + ' (추정)'
                                     ticket_dday = calculate_dday(estimated_open.strftime('%Y.%m.%d'))
-                            except:
+                            except Exception:
                                 pass
 
                         tickets.append({
@@ -486,7 +552,8 @@ def get_interpark_tickets():
         })
 
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e), 'source': '인터파크', 'data': []})
+        logging.error(f"인터파크 크롤링 오류: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': '인터파크 데이터 로딩 실패', 'source': '인터파크', 'data': []})
 
 
 @app.route('/api/ticketing/melon')
@@ -519,7 +586,8 @@ def get_melon_tickets():
     except subprocess.TimeoutExpired:
         return jsonify({'success': False, 'error': 'Timeout (2분 초과)', 'source': '멜론티켓', 'data': []})
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e), 'source': '멜론티켓', 'data': []})
+        logging.error(f"멜론티켓 크롤링 오류: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': '멜론티켓 데이터 로딩 실패', 'source': '멜론티켓', 'data': []})
 
 
 @app.route('/api/ticketing/yes24')
@@ -552,7 +620,8 @@ def get_yes24_tickets():
     except subprocess.TimeoutExpired:
         return jsonify({'success': False, 'error': 'Timeout (2분 초과)', 'source': 'YES24', 'data': []})
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e), 'source': 'YES24', 'data': []})
+        logging.error(f"YES24 크롤링 오류: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'YES24 데이터 로딩 실패', 'source': 'YES24', 'data': []})
 
 
 def normalize_name(name):
@@ -710,7 +779,7 @@ def scheduled_update():
                         if end_formatted >= today_str:
                             filtered_list.append(p)
                         continue
-                    except:
+                    except Exception:
                         pass
             filtered_list.append(p)
 
@@ -723,7 +792,7 @@ def scheduled_update():
                 try:
                     date_str = p['start_date'].replace('.', '')
                     return (1, int(date_str))
-                except:
+                except Exception:
                     return (2, 0)
             return (2, 0)
 
@@ -894,7 +963,7 @@ def get_all_data():
                         if 'region' not in item:
                             item['region'] = classify_region(item.get('venue', ''))
                         merged_performances[perf_hash] = item
-        except:
+        except Exception:
             pass
 
         # 멜론티켓 데이터 (skip_selenium이면 건너뜀)
@@ -923,7 +992,7 @@ def get_all_data():
                             if 'region' not in item:
                                 item['region'] = classify_region(item.get('venue', ''))
                             merged_performances[perf_hash] = item
-            except:
+            except Exception:
                 pass
 
         # YES24 데이터 (skip_selenium이면 건너뜀)
@@ -952,7 +1021,7 @@ def get_all_data():
                             if 'region' not in item:
                                 item['region'] = classify_region(item.get('venue', ''))
                             merged_performances[perf_hash] = item
-            except:
+            except Exception:
                 pass
 
         # 리스트로 변환
@@ -988,7 +1057,7 @@ def get_all_data():
                         if end_formatted >= today_str:
                             filtered_list.append(p)
                         continue
-                    except:
+                    except Exception:
                         pass
             # 날짜 파싱 실패시 일단 포함
             filtered_list.append(p)
@@ -1004,7 +1073,7 @@ def get_all_data():
                 try:
                     date_str = p['start_date'].replace('.', '')
                     return (1, int(date_str))  # D-day 없음: 공연일 순
-                except:
+                except Exception:
                     return (2, 0)
             return (2, 0)
 
@@ -1014,7 +1083,7 @@ def get_all_data():
         try:
             translate_performance_data(performances_list)
         except Exception as e:
-            print(f"[번역] 공연 데이터 번역 실패: {e}")
+            logging.warning(f"공연 데이터 번역 실패: {e}")
 
         return jsonify({
             'success': True,
@@ -1030,12 +1099,15 @@ def get_all_data():
         })
 
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        logging.error(f"전체 데이터 로딩 오류: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': '데이터를 불러오는 중 오류가 발생했습니다.'})
 
 
 # 이미지 캐시 설정
 IMAGE_CACHE_DIR = os.path.join(os.path.dirname(__file__), 'image_cache')
 IMAGE_CACHE_HOURS = 24  # 캐시 유효 시간
+MAX_CACHE_FILES = 500   # 최대 캐시 파일 수
+MAX_CACHE_SIZE_MB = 200 # 최대 캐시 크기 (MB)
 
 # 캐시 폴더 생성
 if not os.path.exists(IMAGE_CACHE_DIR):
@@ -1043,17 +1115,47 @@ if not os.path.exists(IMAGE_CACHE_DIR):
 
 
 def cleanup_old_cache():
-    """오래된 캐시 파일 삭제 (24시간 이상)"""
+    """오래된 캐시 파일 삭제 + 크기/수량 제한"""
     try:
         now = datetime.now()
+        files = []
+        total_size = 0
+
         for filename in os.listdir(IMAGE_CACHE_DIR):
             filepath = os.path.join(IMAGE_CACHE_DIR, filename)
             if os.path.isfile(filepath):
                 file_time = datetime.fromtimestamp(os.path.getmtime(filepath))
+                file_size = os.path.getsize(filepath)
+
+                # 24시간 초과 파일 삭제
                 if (now - file_time).total_seconds() > IMAGE_CACHE_HOURS * 3600:
                     os.remove(filepath)
-    except:
-        pass
+                    continue
+
+                files.append((filepath, file_time, file_size))
+                total_size += file_size
+
+        # 수량 제한 초과 시 오래된 것부터 삭제
+        if len(files) > MAX_CACHE_FILES:
+            files.sort(key=lambda x: x[1])
+            for filepath, _, file_size in files[:len(files) - MAX_CACHE_FILES]:
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+                    total_size -= file_size
+
+        # 크기 제한 초과 시 오래된 것부터 삭제
+        if total_size > MAX_CACHE_SIZE_MB * 1024 * 1024:
+            remaining = [(f, t, s) for f, t, s in files if os.path.exists(f)]
+            remaining.sort(key=lambda x: x[1])
+            for filepath, _, file_size in remaining:
+                if total_size <= MAX_CACHE_SIZE_MB * 1024 * 1024:
+                    break
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+                    total_size -= file_size
+
+    except Exception as e:
+        logging.warning(f"캐시 정리 실패: {e}")
 
 
 @app.route('/api/proxy/image')
@@ -1062,6 +1164,10 @@ def proxy_image():
     url = request.args.get('url', '')
     if not url:
         return '', 404
+
+    # SSRF 방어: URL 안전성 검증
+    if not is_safe_url(url):
+        return '', 403
 
     # URL을 해시로 변환하여 파일명 생성
     url_hash = hashlib.md5(url.encode()).hexdigest()
@@ -1088,7 +1194,7 @@ def proxy_image():
             elif ext == '.webp':
                 content_type = 'image/webp'
             return content, 200, {'Content-Type': content_type, 'Cache-Control': 'max-age=86400'}
-        except:
+        except Exception:
             pass
 
     # 캐시에 없으면 다운로드
@@ -1126,7 +1232,7 @@ def proxy_image():
             try:
                 with open(cache_path, 'wb') as f:
                     f.write(content)
-            except:
+            except Exception:
                 pass
 
             # 가끔 오래된 캐시 정리
@@ -1203,7 +1309,8 @@ def get_ticket_detail():
     except subprocess.TimeoutExpired:
         return jsonify({'success': False, 'error': 'Timeout (1분 초과)', 'data': {}})
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e), 'data': {}})
+        logging.error(f"티켓 상세 조회 오류: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': '상세 정보를 불러오는 중 오류가 발생했습니다.', 'data': {}})
 
 
 @app.route('/api/search')
@@ -1276,7 +1383,7 @@ def load_ui_translations():
             po = polib.pofile(po_path)
             _ui_translations[lang] = {entry.msgid: entry.msgstr for entry in po if entry.msgid}
         except Exception as e:
-            print(f"[i18n] PO 파일 로드 실패 ({lang}): {e}")
+            logging.warning(f"PO 파일 로드 실패 ({lang}): {e}")
             _ui_translations[lang] = {}
 
 load_ui_translations()
@@ -1307,7 +1414,7 @@ def load_translation_cache():
             with open(TRANSLATION_CACHE_FILE, 'r', encoding='utf-8') as f:
                 return json.load(f)
     except Exception as e:
-        print(f"[번역 캐시] 로드 실패: {e}")
+        logging.warning(f"번역 캐시 로드 실패: {e}")
     return {}
 
 def save_translation_cache():
@@ -1318,7 +1425,7 @@ def save_translation_cache():
         with open(TRANSLATION_CACHE_FILE, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as e:
-        print(f"[번역 캐시] 저장 실패: {e}")
+        logging.warning(f"번역 캐시 저장 실패: {e}")
 
 translation_cache = load_translation_cache()
 translation_cache_lock = threading.Lock()
@@ -1372,7 +1479,7 @@ def translate_text(text, from_lang='ko', to_lang='en'):
 
                 return translated
     except Exception as e:
-        print(f"[번역 오류] {e}")
+        logging.debug(f"번역 API 오류: {e}")
 
     return text
 
@@ -1512,4 +1619,5 @@ if __name__ == '__main__':
     print(f"  PC: http://localhost:{port}")
     print(f"  모바일: http://{local_ip}:{port}")
     print("=" * 50)
-    app.run(debug=True, port=port, host='0.0.0.0', use_reloader=False)
+    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    app.run(debug=debug_mode, port=port, host='0.0.0.0', use_reloader=False)
