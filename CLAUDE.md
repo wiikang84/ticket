@@ -151,11 +151,21 @@
 ## 파일 구조
 ```
 ticket/
-├── app.py              # Flask 백엔드 서버 (v3.1 파트+지역 분류 로직)
-├── constants.py        # 공통 상수/분류 함수 (app.py + crawler 공유)
-├── selenium_crawler.py # Selenium 크롤러 (멜론/YES24 다중 장르)
+├── app.py              # Flask 메인 앱 + 라우트 (~800줄)
+├── config.py           # 환경변수 + 설정 상수
+├── constants.py        # 공통 분류 상수/함수 (app.py + crawler 공유)
+├── selenium_crawler.py # Selenium 크롤러 (멜론/YES24, subprocess)
+├── crawlers/
+│   └── kopis.py        # KOPIS API 크롤러 (병렬 3장르)
+├── services/
+│   ├── merger.py       # 데이터 통합/병합 서비스
+│   ├── translation.py  # 번역 서비스 (MyMemory + PO)
+│   └── image_proxy.py  # 이미지 프록시 + 캐시
+├── utils/
+│   ├── security.py     # 보안 유틸 (SSRF, CSP 헤더)
+│   └── helpers.py      # 공통 유틸 (D-day, 필터, 정렬)
 ├── templates/
-│   └── index.html      # 프론트엔드 (파트탭+소스필터+캘린더)
+│   └── index.html      # 프론트엔드 SPA
 ├── translations/       # PO 기반 다국어 번역 (ko/en/ja/zh/es)
 ├── .env                # 환경변수 (API키, 설정)
 ├── .env.example        # 환경변수 템플릿
@@ -185,10 +195,10 @@ python app.py
 - [x] 해시 충돌 위험 해소 — MD5 앞 10자리→16자리 확장
 
 ### 중간 우선순위 (아키텍처)
-- [ ] app.py 1500줄 모듈 분리 (crawlers/, services/, config.py)
+- [x] app.py 모듈 분리 (1414줄→814줄: config/, crawlers/, services/, utils/)
 - [ ] index.html CSS/JS 외부 파일 분리 → CSP unsafe-inline 제거
-- [ ] API 호출 병렬화 (ThreadPoolExecutor)
-- [ ] 번역 캐시 TTL + 최대 크기 제한
+- [x] API 호출 병렬화 (ThreadPoolExecutor: KOPIS 3장르 + 멜론/YES24 병렬)
+- [x] 번역 캐시 TTL(30일) + 최대 크기(10,000항목, 5MB) 제한
 
 ### 낮은 우선순위
 - [ ] 유닛 테스트 추가 (classify_part, classify_region, categorize_concert)
