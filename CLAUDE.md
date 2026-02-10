@@ -164,8 +164,11 @@ ticket/
 ├── utils/
 │   ├── security.py     # 보안 유틸 (SSRF, CSP 헤더)
 │   └── helpers.py      # 공통 유틸 (D-day, 필터, 정렬)
+├── static/
+│   ├── css/style.css   # 외부 CSS (1296줄)
+│   └── js/app.js       # 외부 JS (1051줄)
 ├── templates/
-│   └── index.html      # 프론트엔드 SPA
+│   └── index.html      # 프론트엔드 SPA (218줄, 구조만)
 ├── translations/       # PO 기반 다국어 번역 (ko/en/ja/zh/es)
 ├── .env                # 환경변수 (API키, 설정)
 ├── .env.example        # 환경변수 템플릿
@@ -196,7 +199,7 @@ python app.py
 
 ### 중간 우선순위 (아키텍처)
 - [x] app.py 모듈 분리 (1414줄→814줄: config/, crawlers/, services/, utils/)
-- [ ] index.html CSS/JS 외부 파일 분리 → CSP unsafe-inline 제거
+- [x] index.html CSS/JS 외부 파일 분리 (2567줄→218줄, static/css+js)
 - [x] API 호출 병렬화 (ThreadPoolExecutor: KOPIS 3장르 + 멜론/YES24 병렬)
 - [x] 번역 캐시 TTL(30일) + 최대 크기(10,000항목, 5MB) 제한
 
