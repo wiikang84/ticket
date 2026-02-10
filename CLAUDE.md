@@ -75,7 +75,7 @@
 - **백엔드**: Python Flask
 - **프론트엔드**: HTML, CSS, JavaScript (Vanilla)
 - **캘린더**: FullCalendar 6.1 (CDN)
-- **크롤링**: requests, beautifulsoup4, selenium, webdriver-manager
+- **크롤링**: requests, beautifulsoup4, playwright, playwright-stealth
 - **라이브러리**: flask-cors
 
 ## 주요 기능
@@ -154,7 +154,8 @@ ticket/
 ├── app.py              # Flask 메인 앱 + 라우트 (~800줄)
 ├── config.py           # 환경변수 + 설정 상수
 ├── constants.py        # 공통 분류 상수/함수 (app.py + crawler 공유)
-├── selenium_crawler.py # Selenium 크롤러 (멜론/YES24, subprocess)
+├── playwright_crawler.py # Playwright 크롤러 (멜론/YES24, subprocess)
+├── selenium_crawler.py # [deprecated] Selenium 크롤러 (rollback용 보존)
 ├── crawlers/
 │   └── kopis.py        # KOPIS API 크롤러 (병렬 3장르)
 ├── services/

@@ -4,7 +4,7 @@ requests
 beautifulsoup4
 gunicorn
 APScheduler
-selenium
-webdriver-manager
+playwright
+playwright-stealth
 polib
 python-dotenv

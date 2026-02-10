@@ -327,7 +327,7 @@ def get_melon_tickets():
     """멜론티켓 콘서트 조회 (Selenium - subprocess)"""
     try:
         # 별도 프로세스로 Selenium 실행
-        script_path = os.path.join(os.path.dirname(__file__), 'selenium_crawler.py')
+        script_path = os.path.join(os.path.dirname(__file__), 'playwright_crawler.py')
         result = subprocess.run(
             ['python', script_path, 'melon'],
             capture_output=True,
@@ -361,7 +361,7 @@ def get_yes24_tickets():
     """YES24 티켓 콘서트 조회 (Selenium - subprocess)"""
     try:
         # 별도 프로세스로 Selenium 실행
-        script_path = os.path.join(os.path.dirname(__file__), 'selenium_crawler.py')
+        script_path = os.path.join(os.path.dirname(__file__), 'playwright_crawler.py')
         result = subprocess.run(
             ['python', script_path, 'yes24'],
             capture_output=True,
@@ -616,7 +616,7 @@ def get_ticket_detail():
         if not source or not link:
             return jsonify({'success': False, 'error': 'source와 link 파라미터가 필요합니다.'})
 
-        script_path = os.path.join(os.path.dirname(__file__), 'selenium_crawler.py')
+        script_path = os.path.join(os.path.dirname(__file__), 'playwright_crawler.py')
 
         # 링크에서 ID 추출
         if source == 'melon' or '멜론' in source:
