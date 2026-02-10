@@ -412,7 +412,7 @@ def scheduled_update():
 
         # 인터파크 데이터 수집
         try:
-            with app.test_request_context():
+            with app.app_context(), app.test_request_context():
                 interpark_response = get_interpark_tickets()
                 interpark_data = interpark_response.get_json()
                 if interpark_data.get('success'):
@@ -507,10 +507,12 @@ def get_all_data():
 
         # Phase 1: KOPIS 3장르 + 인터파크 병렬 수집
         def fetch_interpark_data():
+            """ThreadPoolExecutor 스레드에서 인터파크 데이터 수집 (app context 필요)"""
             try:
-                resp = get_interpark_tickets()
-                data = resp.get_json()
-                return data.get('data', []) if data.get('success') else []
+                with app.app_context(), app.test_request_context():
+                    resp = get_interpark_tickets()
+                    data = resp.get_json()
+                    return data.get('data', []) if data.get('success') else []
             except Exception:
                 return []
 
@@ -531,18 +533,40 @@ def get_all_data():
         # Phase 2: 멜론 + YES24 병렬 수집 (skip_selenium이면 건너뜀)
         if not skip_selenium:
             def fetch_melon_data():
+                """ThreadPoolExecutor 스레드에서 멜론 데이터 수집 (Flask 우회, subprocess 직접 호출)"""
                 try:
-                    resp = get_melon_tickets()
-                    data = resp.get_json()
-                    return data.get('data', []) if data.get('success') else []
+                    script_path = os.path.join(os.path.dirname(__file__), 'playwright_crawler.py')
+                    result = subprocess.run(
+                        ['python', script_path, 'melon'],
+                        capture_output=True,
+                        timeout=120,
+                        cwd=os.path.dirname(__file__),
+                        encoding='utf-8',
+                        errors='replace'
+                    )
+                    if result.returncode == 0 and result.stdout:
+                        data = json.loads(result.stdout)
+                        return data.get('data', []) if data.get('success') else []
+                    return []
                 except Exception:
                     return []
 
             def fetch_yes24_data():
+                """ThreadPoolExecutor 스레드에서 YES24 데이터 수집 (Flask 우회, subprocess 직접 호출)"""
                 try:
-                    resp = get_yes24_tickets()
-                    data = resp.get_json()
-                    return data.get('data', []) if data.get('success') else []
+                    script_path = os.path.join(os.path.dirname(__file__), 'playwright_crawler.py')
+                    result = subprocess.run(
+                        ['python', script_path, 'yes24'],
+                        capture_output=True,
+                        timeout=120,
+                        cwd=os.path.dirname(__file__),
+                        encoding='utf-8',
+                        errors='replace'
+                    )
+                    if result.returncode == 0 and result.stdout:
+                        data = json.loads(result.stdout)
+                        return data.get('data', []) if data.get('success') else []
+                    return []
                 except Exception:
                     return []
 
@@ -566,11 +590,11 @@ def get_all_data():
         performances_list = filter_ended_performances(performances_list)
         sort_by_dday(performances_list)
 
-        # 공연 데이터 사전 번역
-        try:
-            translate_performance_data(performances_list)
-        except Exception as e:
-            logging.warning(f"공연 데이터 번역 실패: {e}")
+        # 공연 데이터 사전 번역 (스케줄러에서 백그라운드 처리, API 응답 지연 방지)
+        # try:
+        #     translate_performance_data(performances_list)
+        # except Exception as e:
+        #     logging.warning(f"공연 데이터 번역 실패: {e}")
 
         return jsonify({
             'success': True,

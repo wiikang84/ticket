@@ -82,6 +82,10 @@ def get_cached_or_download(url):
         except Exception:
             pass
 
+    # noimg 플레이스홀더 URL 차단 (YES24 기본 로고)
+    if 'noimg' in url.lower():
+        return None, None, 404
+
     # 다운로드
     try:
         headers = {

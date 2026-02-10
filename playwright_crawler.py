@@ -9,6 +9,8 @@ import sys
 import json
 import os
 import re
+import requests
+from concurrent.futures import ThreadPoolExecutor
 
 # 프로젝트 루트를 path에 추가 (subprocess 실행 시 import 지원)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -243,7 +245,10 @@ def crawl_yes24():
                                           img.get('data-lazy-src', ''))
 
                                 if poster:
-                                    if poster.startswith('//'):
+                                    # noimg 플레이스홀더 필터링 (YES24 기본 로고)
+                                    if 'noimg' in poster.lower():
+                                        poster = ''
+                                    elif poster.startswith('//'):
                                         poster = 'https:' + poster
                                     elif not poster.startswith('http'):
                                         poster = 'https://ticket.yes24.com' + poster
@@ -286,6 +291,38 @@ def crawl_yes24():
             return {'success': False, 'error': str(e), 'data': []}
         finally:
             browser.close()
+
+    # 2차 패스: 포스터 없는 항목은 requests로 빠르게 보충 (병렬, ~2-3초)
+    no_poster_items = [t for t in tickets if not t.get('poster')]
+    if no_poster_items:
+        def _fetch_poster(item):
+            try:
+                code_match = re.search(r'/Perf/(\d+)', item['link'])
+                if not code_match:
+                    return
+                url = item['link']
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                }
+                resp = requests.get(url, headers=headers, timeout=10)
+                if resp.status_code != 200:
+                    return
+                detail_soup = BeautifulSoup(resp.text, 'html.parser')
+                # .rn-product-imgbox img에서 포스터 추출
+                poster_img = detail_soup.select_one('.rn-product-imgbox img')
+                if poster_img:
+                    src = poster_img.get('src', '') or poster_img.get('data-src', '')
+                    if src and 'noimg' not in src.lower():
+                        if src.startswith('//'):
+                            src = 'https:' + src
+                        elif not src.startswith('http'):
+                            src = 'https://ticket.yes24.com' + src
+                        item['poster'] = src
+            except Exception:
+                pass
+
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            executor.map(_fetch_poster, no_poster_items)
 
     seen = set()
     unique = [t for t in tickets if not (t['hash'] in seen or seen.add(t['hash']))]
