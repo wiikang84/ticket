@@ -152,9 +152,13 @@
 ```
 ticket/
 ├── app.py              # Flask 백엔드 서버 (v3.1 파트+지역 분류 로직)
+├── constants.py        # 공통 상수/분류 함수 (app.py + crawler 공유)
 ├── selenium_crawler.py # Selenium 크롤러 (멜론/YES24 다중 장르)
 ├── templates/
 │   └── index.html      # 프론트엔드 (파트탭+소스필터+캘린더)
+├── translations/       # PO 기반 다국어 번역 (ko/en/ja/zh/es)
+├── .env                # 환경변수 (API키, 설정)
+├── .env.example        # 환경변수 템플릿
 ├── CLAUDE.md           # 프로젝트 문서 (이 파일)
 └── .gitignore
 ```
@@ -171,6 +175,25 @@ python app.py
 - 크롤링: 공개된 정보만 수집
 - 상업적 목적 아닌 개인 프로젝트
 - 각 사이트 robots.txt 준수
+
+## TODO - 개선 과제
+
+### 높은 우선순위 (데이터 품질)
+- [x] 장르 키워드 공통 모듈 분리 (`constants.py`) — app.py 200+개 vs crawler 30개 불일치 해소
+- [x] 지역 분류 기본값 '서울' 편중 수정 — venue 없는 데이터 '미분류' 처리
+- [x] 키워드 부분 매칭 오분류 수정 — 단어 경계 매칭 도입 (IU→STADIUM, PLAY→REPLAY 등)
+- [x] 해시 충돌 위험 해소 — MD5 앞 10자리→16자리 확장
+
+### 중간 우선순위 (아키텍처)
+- [ ] app.py 1500줄 모듈 분리 (crawlers/, services/, config.py)
+- [ ] index.html CSS/JS 외부 파일 분리 → CSP unsafe-inline 제거
+- [ ] API 호출 병렬화 (ThreadPoolExecutor)
+- [ ] 번역 캐시 TTL + 최대 크기 제한
+
+### 낮은 우선순위
+- [ ] 유닛 테스트 추가 (classify_part, classify_region, categorize_concert)
+- [ ] flask-limiter Rate Limiting 도입
+- [ ] create_app() 팩토리 패턴 전환
 
 ## 연락처
 - KOPIS API 문의: 02-2098-2945

@@ -76,6 +76,9 @@ msgstr "경상"
 msgid "jeju"
 msgstr "제주"
 
+msgid "unclassified"
+msgstr "미분류"
+
 msgid "notification"
 msgstr "알림"
 

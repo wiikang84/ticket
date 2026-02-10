@@ -76,6 +76,9 @@ msgstr "庆尚"
 msgid "jeju"
 msgstr "济州"
 
+msgid "unclassified"
+msgstr "未分类"
+
 msgid "notification"
 msgstr "通知"
 

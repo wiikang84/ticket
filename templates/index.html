@@ -1391,6 +1391,7 @@
                 <button class="region-tab" onclick="filterRegion('전라', this)" data-i18n="jeolla">전라</button>
                 <button class="region-tab" onclick="filterRegion('경상', this)" data-i18n="gyeongsang">경상</button>
                 <button class="region-tab" onclick="filterRegion('제주', this)" data-i18n="jeju">제주</button>
+                <button class="region-tab" onclick="filterRegion('미분류', this)" data-i18n="unclassified">미분류</button>
             </div>
 
             <!-- 콘서트 세부 장르 탭 (콘서트 파트에서만 표시) -->
@@ -1601,7 +1602,8 @@
         function getRegionI18nKey(region) {
             const map = {
                 '서울': 'seoul', '경기·인천': 'gyeonggi', '강원': 'gangwon',
-                '충청': 'chungcheong', '전라': 'jeolla', '경상': 'gyeongsang', '제주': 'jeju'
+                '충청': 'chungcheong', '전라': 'jeolla', '경상': 'gyeongsang', '제주': 'jeju',
+                '미분류': 'unclassified'
             };
             return map[region] || region;
         }
@@ -1968,7 +1970,8 @@
                 '충청': '#7C3AED',
                 '전라': '#EA580C',
                 '경상': '#DC2626',
-                '제주': '#DB2777'
+                '제주': '#DB2777',
+                '미분류': '#888888'
             };
             return colors[region] || '#888';
         }

@@ -76,6 +76,9 @@ msgstr "Gyeongsang"
 msgid "jeju"
 msgstr "Jeju"
 
+msgid "unclassified"
+msgstr "Sin clasificar"
+
 msgid "notification"
 msgstr "Notificación"
 

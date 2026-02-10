@@ -7,6 +7,10 @@ Selenium 크롤러 (별도 프로세스)
 import sys
 import json
 import os
+
+# 프로젝트 루트를 path에 추가 (subprocess 실행 시 import 지원)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from constants import get_cache_key, normalize_name, classify_part, categorize_concert, CONCERT_CATEGORIES
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -19,46 +23,8 @@ from bs4 import BeautifulSoup
 import time
 import hashlib
 
-def get_cache_key(data):
-    """중복 체크용 해시 생성"""
-    return hashlib.md5(data.encode('utf-8')).hexdigest()[:10]
 
-# 콘서트 세부 장르 분류 키워드
-CONCERT_CATEGORIES = {
-    "아이돌": ["BTS", "방탄", "에이핑크", "Apink", "제로베이스원", "ZEROBASE", "아이브", "IVE",
-              "르세라핌", "SSERAFIM", "뉴진스", "NewJeans", "스트레이키즈", "Stray Kids",
-              "엔시티", "NCT", "세븐틴", "SEVENTEEN", "블랙핑크", "BLACKPINK", "에스파", "aespa",
-              "엑소", "EXO", "샤이니", "SHINee", "레드벨벳", "Red Velvet", "트와이스", "TWICE"],
-    "발라드": ["먼데이키즈", "임재범", "성시경", "10CM", "아이유", "IU", "백예린", "헤이즈"],
-    "랩/힙합": ["다이나믹듀오", "박재범", "지코", "ZICO", "창모"],
-    "트로트": ["트롯", "트로트", "미스터트롯", "송가인", "임영웅", "영탁"],
-    "내한공연": ["내한", "World Tour", "Asia Tour", "Live in Seoul"],
-    "팬미팅": ["팬미팅", "Fan Meeting", "팬콘", "FAN-CON"],
-}
-
-# 파트 분류 키워드
-def classify_part(name):
-    """공연명으로 파트 분류 (concert / theater)"""
-    if not name:
-        return 'concert'
-    name_upper = name.upper()
-    theater_keywords = ['뮤지컬', 'MUSICAL', '연극', 'PLAY', 'THEATER', '오페라', 'OPERA',
-                       '발레', 'BALLET', '창극', '마당극']
-    for kw in theater_keywords:
-        if kw in name_upper:
-            return 'theater'
-    return 'concert'
-
-def categorize_concert(name):
-    """공연명으로 콘서트 세부 장르 분류"""
-    if not name:
-        return "기타"
-    name_upper = name.upper()
-    for category, keywords in CONCERT_CATEGORIES.items():
-        for keyword in keywords:
-            if keyword.upper() in name_upper:
-                return category
-    return "기타"
+# 공통 상수/함수는 constants.py에서 import
 
 def get_driver():
     """헤드리스 크롬 드라이버 생성 (봇 탐지 우회)"""
@@ -174,7 +140,7 @@ def crawl_melon():
                     'link': full_link,
                     'category': categorize_concert(title),
                     'part': classify_part(title),  # 파트 분류
-                    'hash': get_cache_key(title)
+                    'hash': get_cache_key(normalize_name(title))
                 })
             except Exception:
                 continue
@@ -321,7 +287,7 @@ def crawl_yes24():
                             'link': full_link,
                             'category': categorize_concert(title),
                             'part': item_part,  # 파트 분류
-                            'hash': get_cache_key(title)
+                            'hash': get_cache_key(normalize_name(title))
                         })
                     except Exception:
                         continue
